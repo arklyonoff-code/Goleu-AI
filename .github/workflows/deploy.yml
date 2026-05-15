@@ -45,6 +45,10 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # repo에 Pages가 아직 활성화되어 있지 않으면 자동으로 활성화 (Source=GitHub Actions로).
+          # permissions.pages: write 가 이미 위에 선언되어 있어 token 권한은 충족.
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
