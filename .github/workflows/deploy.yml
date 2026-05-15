@@ -1,0 +1,63 @@
+name: Deploy ToolFit to GitHub Pages
+
+# - push 시 자동으로 build → GitHub Pages 배포
+# - VITE_GA_MEASUREMENT_ID 는 Repo Secret 에서 주입 (없으면 analytics 비활성)
+# - VITE_BASE_PATH 는 repo 이름이 toolfit 이 아닐 경우 Repo Variable 로 덮어쓰기 가능
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./toolfit_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: toolfit_app/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        env:
+          # repo 이름이 다르면 Settings → Variables → Actions 에서 VITE_BASE_PATH 등록
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: toolfit_app/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
