@@ -1,8 +1,5 @@
-// GitHub Pages 같은 정적 호스팅은 SPA fallback(any path → index.html)을 기본 지원하지 않으므로
-// 새로고침 시 404 가 나는 BrowserRouter 대신 HashRouter 를 사용. URL 은 /#/tools 형태가 됨.
-// 커스텀 도메인 + SPA fallback 구성이 가능한 호스팅으로 옮길 때만 BrowserRouter 로 되돌리면 됨.
 import {
-  HashRouter as Router,
+  BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
