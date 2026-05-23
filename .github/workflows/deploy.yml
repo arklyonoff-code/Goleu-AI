@@ -38,8 +38,7 @@ jobs:
 
       - name: Build
         env:
-          # repo 이름이 다르면 Settings → Variables → Actions 에서 VITE_BASE_PATH 등록
-          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+          VITE_BASE_PATH: /
           VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
         run: npm run build
 
