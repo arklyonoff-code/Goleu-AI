@@ -14,6 +14,8 @@ const T = {
     model: "모델", tier: "등급", price: "가격 (입력/출력, 1M 토큰)", monthly: "월 비용",
     tiers: { economy: "저가", balanced: "균형", premium: "고가" },
     monthlyReq: (n, d) => `= 월 ${n.toLocaleString()}건 · 예: 사용자 ${d.toLocaleString()}명이 하루 1번씩 쓰는 경우`,
+    hostFilter: "제공처", hostAll: "전체", hostUs: "미국 업체·미국 리전만",
+    hostNote: "같은 오픈 웨이트 모델도 중국 업체 공식 API와 미국 호스팅(Together AI)의 가격이 다를 수 있어 나눠서 보여줍니다. 공식 API의 실제 처리 위치는 확인하지 않았습니다.",
     verdict: (c, b, p) => `이 조건에서 가장 싼 선택은 ${c}예요. 균형 등급 최저가는 ${b}, 고가 등급 최저가는 ${p}예요.`,
     perMonth: (v) => `월 ${v}`,
     toBuild: "이 조건으로 전체 스택 보기 →", copy: "이 조건 링크 복사", copied: "복사했어요",
@@ -33,6 +35,8 @@ const T = {
     model: "Model", tier: "Tier", price: "Price (in/out per 1M tokens)", monthly: "Monthly cost",
     tiers: { economy: "Economy", balanced: "Balanced", premium: "Premium" },
     monthlyReq: (n, d) => `= ${n.toLocaleString()} requests/month · e.g. ${d.toLocaleString()} users, once a day each`,
+    hostFilter: "Provider", hostAll: "All", hostUs: "US companies / US regions only",
+    hostNote: "Open-weight models are listed twice: the vendor's official API and a US host (Together AI), since prices can differ. We haven't verified where the official APIs process data.",
     verdict: (c, b, p) => `Cheapest at these settings: ${c}. Cheapest balanced-tier: ${b}. Cheapest premium-tier: ${p}.`,
     perMonth: (v) => `${v}/mo`,
     toBuild: "See the full stack for these settings →", copy: "Copy link to these settings", copied: "Copied",
@@ -78,6 +82,7 @@ export default function LlmCost() {
   const [prefix, setPrefix] = useState(0);
   const [expiry, setExpiry] = useState(0);
   const cacheOn = Boolean(USE_CASES[preset].cache);
+  const [hostScope, setHostScope] = useState("all");
   const [urlReady, setUrlReady] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -98,6 +103,7 @@ export default function LlmCost() {
     if (o !== null) setOutTok(o);
     if (c !== null) setPrefix(c);
     if (e !== null) setExpiry(e);
+    if (q.get("h") === "us") setHostScope("us");
     if (p) trackEvent("llm_cost_shared_open", { preset: p });
     setUrlReady(true);
   }, []);
@@ -107,8 +113,9 @@ export default function LlmCost() {
     if (!urlReady) return;
     const q = new URLSearchParams({ p: preset, d: perDay || 0, i: inTok || 0, o: outTok || 0 });
     if (cacheOn) { q.set("c", prefix); q.set("e", expiry); }
+    if (hostScope === "us") q.set("h", "us");
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${q}`);
-  }, [urlReady, preset, perDay, inTok, outTok, cacheOn, prefix, expiry]);
+  }, [urlReady, preset, perDay, inTok, outTok, cacheOn, prefix, expiry, hostScope]);
 
   const buildHref = `/build?${new URLSearchParams({
     desc: BUILD_DESC[preset][ko ? "ko" : "en"],
@@ -137,11 +144,14 @@ export default function LlmCost() {
   const rows = useMemo(() => {
     const monthlyReq = (perDay || 0) * 30;
     return PRICES.llms
+      .filter((m) => hostScope === "all" || (m.region || "us") === "us")
       .map((m) => effectivePrice(m))
       .map((m) => ({
         key: m.id,
         name: m.name,
         vendor: m.vendor,
+        host: m.host,
+        region: m.region || "us",
         tier: m.tier,
         price: `$${m.input} / $${m.output}`,
         cacheRead: m.cacheRead,
@@ -149,10 +159,10 @@ export default function LlmCost() {
         monthly: (monthlyReq * (inTok || 0) / 1e6) * (cacheOn ? inputRate(m, prefix / 100, expiry / 100) : m.input) + (monthlyReq * (outTok || 0) / 1e6) * m.output,
       }))
       .sort((a, b) => a.monthly - b.monthly);
-  }, [perDay, inTok, outTok, cacheOn, prefix, expiry]);
+  }, [perDay, inTok, outTok, cacheOn, prefix, expiry, hostScope]);
 
   // 표 위 결론 한 줄: 전체 최저가(1% 이내 동률 포함), 균형·고가 등급 각각의 최저가. 품질 판단은 하지 않는다
-  const label = (r) => `${r.name} (${t.perMonth(usd(r.monthly))})`;
+  const label = (r) => `${r.name}${r.host ? ` · ${r.vendor}` : ""} (${t.perMonth(usd(r.monthly))})`;
   const cheapest = rows.filter((r) => r.monthly <= rows[0].monthly * 1.01);
   const bestOf = (tier) => rows.find((r) => r.tier === tier);
   const verdict = rows.length && bestOf("balanced") && bestOf("premium")
@@ -160,7 +170,7 @@ export default function LlmCost() {
     : null;
 
   const columns = [
-    { title: t.model, dataIndex: "name", render: (v, r) => <div><b>{v}</b><div style={{ fontSize: 12, color: "#888" }}>{r.vendor}{r.note ? ` · ${noteText(r.note, ko)}` : ""}</div></div> },
+    { title: t.model, dataIndex: "name", render: (v, r) => <div><b>{v}</b><div style={{ fontSize: 12, color: "#888" }}>{r.vendor}{r.host ? ` · ${noteText(r.host, ko)}` : ""}{r.note ? ` · ${noteText(r.note, ko)}` : ""}</div></div> },
     { title: t.tier, dataIndex: "tier", render: (v) => <Tag color={TIER_COLOR[v]}>{t.tiers[v]}</Tag> },
     { title: t.price, dataIndex: "price", responsive: ["sm"], render: (v, r) => <div>{v}{r.cacheRead != null && <div style={{ fontSize: 12, color: "#888" }}>{t.cached} ${r.cacheRead}</div>}</div> },
     { title: t.monthly, dataIndex: "monthly", align: "right", render: (v) => <b>{usd(v)}</b> },
@@ -182,6 +192,10 @@ export default function LlmCost() {
         <div><div style={field}>{t.inTok}</div><InputNumber style={{ width: "100%" }} min={0} step={100} value={inTok} onChange={setInTok} /></div>
         <div><div style={field}>{t.outTok}</div><InputNumber style={{ width: "100%" }} min={0} step={100} value={outTok} onChange={setOutTok} /></div>
       </div>
+
+      <div style={{ ...field, marginTop: 16 }}>{t.hostFilter}</div>
+      <Segmented value={hostScope} onChange={(v) => { setHostScope(v); trackEvent("llm_cost_host", { scope: v }); }}
+        options={[{ label: t.hostAll, value: "all" }, { label: t.hostUs, value: "us" }]} />
 
       <p style={{ fontSize: 13, color: "#666", marginTop: 8 }}>{t.monthlyReq((perDay || 0) * 30, perDay || 0)}</p>
 
@@ -220,6 +234,7 @@ export default function LlmCost() {
 
       <p style={{ fontSize: 12, color: "#888", marginTop: 12 }}>{t.note(PRICES.asOf)}</p>
       <p style={{ fontSize: 12, color: "#888" }}>{t.tierNote}</p>
+      <p style={{ fontSize: 12, color: "#888" }}>{t.hostNote}</p>
 
       <div style={{ marginTop: 32, padding: 24, borderRadius: 12, background: "#f5f3ff" }}>
         <div style={{ fontWeight: 700, fontSize: 18 }}>{t.ctaTitle}</div>

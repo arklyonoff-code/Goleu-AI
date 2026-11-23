@@ -25,10 +25,17 @@ export const PRICES = {
     cloudflare: "https://developers.cloudflare.com/workers/platform/pricing/",
     google: "https://ai.google.dev/gemini-api/docs/pricing",
     railway: "https://docs.railway.com/pricing",
+    deepseek: "https://api-docs.deepseek.com/quick_start/pricing",
+    moonshot: "https://platform.kimi.ai/docs/pricing/chat",
+    zai: "https://docs.z.ai/guides/overview/pricing",
+    alibaba: "https://www.alibabacloud.com/help/en/model-studio/model-pricing",
+    together: "https://www.together.ai/pricing",
   },
   // USD / 1M tokens. tier 는 같은 회사 안의 가격 순서 기준(품질 평가가 아님).
   // cacheRead = 캐시 적중 입력 단가, cacheWrite = 캐시 쓰기 단가(2026-11-23 확인).
   // cacheWrite 가 없는 모델(OpenAI 자동 캐싱, Gemini 암시적 캐싱)은 쓰기 할증 없이 입력 단가로 계산. Gemini 캐시 저장료는 미반영.
+  // region: "us" = 미국 업체 또는 미국 리전에서 처리, "cn" = 중국 업체 공식 API(처리 위치 미확인). host: 같은 모델의 제공처 구분.
+  // recommend: false 인 모델은 계산기(/llm-cost)에만 나오고 스택 추천(/build) 후보에서는 빠진다.
   // gpt-6-luna 의 cacheRead 는 공식 페이지 Flex 표($0.005, Standard의 절반)에서 역산한 값.
   llms: [
     { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, cacheRead: 0.01, cacheWrite: 0.125, note: { ko: "프롬프트 10만 토큰 이하 기준", en: "for prompts up to 100K tokens" }, src: "anthropic", affiliate: null },
@@ -38,6 +45,16 @@ export const PRICES = {
     { id: "claude-sonnet-5.5", name: "Claude Sonnet 5.5", vendor: "Anthropic", tier: "balanced", input: 2.00, output: 10.00, cacheRead: 0.10, cacheWrite: 2.50, src: "anthropic", affiliate: null },
     { id: "claude-opus-5.5", name: "Claude Opus 5.5", vendor: "Anthropic", tier: "premium", input: 4.00, output: 20.00, cacheRead: 0.20, cacheWrite: 5.00, src: "anthropic", affiliate: null },
     { id: "gpt-6.2-astra", name: "GPT-6.2 Astra", vendor: "OpenAI", tier: "premium", input: 8.00, output: 40.00, cacheRead: 0.40, src: "openai", affiliate: null },
+    // 오픈 웨이트 모델: 같은 모델을 공식 API(중국 업체)와 미국 호스팅(Together AI)으로 나눠 싣는다. 2026-11-23 확인.
+    // DeepSeek 공식은 비혼잡 시간 요금. 혼잡 시간(평일 01–04, 06–10 UTC)은 2배($1.32 / $3.96, 캐시 $0.044)
+    { id: "deepseek-v4-pro@deepseek", name: "DeepSeek V4 Pro", vendor: "DeepSeek", host: { ko: "공식 API · 비혼잡 시간 기준, 혼잡 시간 2배", en: "official API · off-peak, 2x at peak hours" }, region: "cn", tier: "balanced", input: 0.66, output: 1.98, cacheRead: 0.022, src: "deepseek", recommend: false, affiliate: null },
+    { id: "deepseek-v4-pro@together", name: "DeepSeek V4 Pro", vendor: "Together AI", host: { ko: "미국 호스팅", en: "US-hosted" }, region: "us", tier: "balanced", input: 1.32, output: 3.96, cacheRead: 0.13, src: "together", recommend: false, affiliate: null },
+    { id: "kimi-k3.1-pro@moonshot", name: "Kimi K3.1 Pro", vendor: "Moonshot AI", host: { ko: "공식 API", en: "official API" }, region: "cn", tier: "balanced", input: 2.00, output: 10.00, cacheRead: 0.20, cacheWrite: 2.00, src: "moonshot", recommend: false, affiliate: null },
+    { id: "kimi-k3.1-pro@together", name: "Kimi K3.1 Pro", vendor: "Together AI", host: { ko: "미국 호스팅", en: "US-hosted" }, region: "us", tier: "balanced", input: 2.00, output: 10.00, cacheRead: 0.20, src: "together", recommend: false, affiliate: null },
+    { id: "glm-5.3@zai", name: "GLM-5.3", vendor: "Z.ai", host: { ko: "공식 API", en: "official API" }, region: "cn", tier: "balanced", input: 1.40, output: 4.40, cacheRead: 0.26, src: "zai", recommend: false, affiliate: null },
+    { id: "glm-5.3@together", name: "GLM-5.3", vendor: "Together AI", host: { ko: "미국 호스팅", en: "US-hosted" }, region: "us", tier: "balanced", input: 1.40, output: 4.40, cacheRead: 0.26, src: "together", recommend: false, affiliate: null },
+    // Qwen4 Max 는 오픈 웨이트가 아니라 외부 호스팅이 없다. Alibaba 공식 미국(버지니아) 리전이 국제 리전과 같은 가격
+    { id: "qwen4-max@alibaba-us", name: "Qwen4 Max", vendor: "Alibaba Cloud", host: { ko: "공식 API · 미국(버지니아) 리전, 국제 리전과 같은 가격", en: "official API · US (Virginia) region, same price as international" }, region: "us", tier: "balanced", input: 1.50, output: 4.50, cacheRead: 0.075, cacheWrite: 1.875, src: "alibaba", recommend: false, affiliate: null },
   ],
   vectorDbs: {
     supabaseFree: { name: "Supabase pgvector (Free)", monthly: 0, note: { ko: "DB 500MB, 7일 미사용 시 일시정지", en: "500MB DB, pauses after 7 idle days" }, src: "supabase", affiliate: null },
@@ -105,7 +122,7 @@ function llmCost(model, requests, uc) {
 function pickLlm(useCase, priority, today) {
   let tier = priority === "cost" ? "economy" : priority === "quality" ? "premium" : "balanced";
   if (useCase === "agent" && tier === "economy") tier = "balanced"; // 여러 단계 도구 호출은 저가 모델에서 실패가 잦다
-  const candidates = PRICES.llms.filter((m) => m.tier === tier).map((m) => effectivePrice(m, today));
+  const candidates = PRICES.llms.filter((m) => m.tier === tier && m.recommend !== false).map((m) => effectivePrice(m, today));
   // 같은 등급 안에서는 더 싼 쪽을 기본으로, 다른 하나를 대안으로
   const sorted = [...candidates].sort((a, b) => (a.input + a.output) - (b.input + b.output));
   return { primary: sorted[0], alternative: sorted[1] || null, tier };

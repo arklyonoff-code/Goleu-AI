@@ -172,7 +172,7 @@ export function LlmCostRoute() {
     <>
       <Seo
         title="LLM API monthly cost calculator — Goleu AI"
-        description="Compare the monthly cost of OpenAI, Anthropic and Google models from your daily requests and tokens per request. Official list prices with the date checked."
+        description="Compare the monthly cost of OpenAI, Anthropic, Google, DeepSeek, Qwen, Kimi and GLM models, official API vs US-hosted, from your daily requests and tokens per request. List prices with the date checked."
         path="/llm-cost"
         image="/og-llm-cost.png"
       />
