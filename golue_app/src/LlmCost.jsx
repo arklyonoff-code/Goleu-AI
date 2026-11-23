@@ -17,7 +17,7 @@ const T = {
     hostFilter: "제공처", hostAll: "전체", hostUs: "미국 업체·미국 리전만",
     hostNote: "같은 오픈 웨이트 모델도 중국 업체 공식 API와 미국 호스팅(Together AI)의 가격이 다를 수 있어 나눠서 보여줍니다. 공식 API의 실제 처리 위치는 확인하지 않았습니다.",
     verdict: (c, b, p) => `이 조건에서 가장 싼 선택은 ${c}예요. 균형 등급 최저가는 ${b}, 고가 등급 최저가는 ${p}예요.`,
-    perMonth: (v) => `월 ${v}`,
+    perMonth: (v) => `월 ${v}`, offPeak: "비혼잡 시간",
     toBuild: "이 조건으로 전체 스택 보기 →", copy: "이 조건 링크 복사", copied: "복사했어요",
     cacheTitle: "프롬프트 캐싱", prefix: "입력 중 매번 반복되는 앞부분 (시스템 프롬프트·이전 대화)", expiry: "캐시가 만료돼 다시 쓰는 비율 (요청 간격이 캐시 유지 시간보다 길 때)",
     cacheNote: "기본값은 이 용도의 가정입니다. 캐시 쓰기는 Anthropic만 입력가의 1.25배, OpenAI·Google은 입력가로 계산합니다.", cached: "캐시",
@@ -38,7 +38,7 @@ const T = {
     hostFilter: "Provider", hostAll: "All", hostUs: "US companies / US regions only",
     hostNote: "Open-weight models are listed twice: the vendor's official API and a US host (Together AI), since prices can differ. We haven't verified where the official APIs process data.",
     verdict: (c, b, p) => `Cheapest at these settings: ${c}. Cheapest balanced-tier: ${b}. Cheapest premium-tier: ${p}.`,
-    perMonth: (v) => `${v}/mo`,
+    perMonth: (v) => `${v}/mo`, offPeak: "off-peak",
     toBuild: "See the full stack for these settings →", copy: "Copy link to these settings", copied: "Copied",
     cacheTitle: "Prompt caching", prefix: "Share of input repeated every request (system prompt, prior turns)", expiry: "Share re-written after cache expiry (gap between requests > cache lifetime)",
     cacheNote: "Defaults are assumptions for this use case. Cache writes: Anthropic at 1.25x input, OpenAI and Google at the input price.", cached: "cached",
@@ -155,6 +155,7 @@ export default function LlmCost() {
         tier: m.tier,
         price: `$${m.input} / $${m.output}`,
         cacheRead: m.cacheRead,
+        offPeak: Boolean(m.offPeak),
         note: m.note,
         monthly: (monthlyReq * (inTok || 0) / 1e6) * (cacheOn ? inputRate(m, prefix / 100, expiry / 100) : m.input) + (monthlyReq * (outTok || 0) / 1e6) * m.output,
       }))
@@ -162,10 +163,13 @@ export default function LlmCost() {
   }, [perDay, inTok, outTok, cacheOn, prefix, expiry, hostScope]);
 
   // 표 위 결론 한 줄: 전체 최저가(1% 이내 동률 포함), 균형·고가 등급 각각의 최저가. 품질 판단은 하지 않는다
-  const label = (r) => `${r.name}${r.host ? ` · ${r.vendor}` : ""} (${t.perMonth(usd(r.monthly))})`;
-  const cheapest = rows.filter((r) => r.monthly <= rows[0].monthly * 1.01);
+  // 비혼잡 시간 요금처럼 조건이 붙은 가격은 결론 문장에도 그 조건을 함께 적는다 (표만 안 읽고 공유되는 경우 대비)
+  const label = (r) => `${r.name}${r.host ? ` · ${r.vendor}` : ""} (${t.perMonth(usd(r.monthly))}${r.offPeak ? `, ${t.offPeak}` : ""})`;
+  // 요청 수나 토큰이 0이면 모든 모델이 $0 이라 결론을 내지 않는다
+  const hasCost = rows.length > 0 && rows[0].monthly > 0;
+  const cheapest = hasCost ? rows.filter((r) => r.monthly <= rows[0].monthly * 1.01) : [];
   const bestOf = (tier) => rows.find((r) => r.tier === tier);
-  const verdict = rows.length && bestOf("balanced") && bestOf("premium")
+  const verdict = hasCost && bestOf("balanced") && bestOf("premium")
     ? t.verdict(cheapest.map(label).join(" · "), label(bestOf("balanced")), label(bestOf("premium")))
     : null;
 
