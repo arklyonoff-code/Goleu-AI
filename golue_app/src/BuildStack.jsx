@@ -1,5 +1,5 @@
 // AI 빌더 스택 추천 (/build): 한 줄 설명 + 규모 + 우선순위 → Worker /ai-stack
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, Segmented, Card, Alert, Tag } from "antd";
 import { useLanguage } from "./lib/LanguageContext";
 import { trackEvent } from "./lib/analytics";
@@ -70,8 +70,10 @@ export default function BuildStack() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function submit() {
-    if (!description.trim()) { setError(t.empty); return; }
+  // over: 상태 갱신을 기다리지 않고 바로 보낼 값 (링크로 들어온 경우)
+  async function submit(over = {}) {
+    const v = { description, mau, priority, language, ...over };
+    if (!v.description.trim()) { setError(t.empty); return; }
     const base = resolveWorkerUrl();
     if (!base) { setError(t.error); return; }
     setLoading(true); setError("");
@@ -79,18 +81,32 @@ export default function BuildStack() {
       const res = await fetch(`${base}/ai-stack`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description, mau, priority, language, lang: lang === "ko" ? "ko" : "en" }),
+        body: JSON.stringify({ description: v.description, mau: v.mau, priority: v.priority, language: v.language, lang: lang === "ko" ? "ko" : "en" }),
       });
       if (!res.ok) throw new Error(String(res.status));
       const data = await res.json();
       setResult(data);
-      trackEvent("ai_stack_recommended", { use_case: data.useCase.id, mau, priority, language, total_usd: data.cost.total });
+      trackEvent("ai_stack_recommended", { use_case: data.useCase.id, mau: v.mau, priority: v.priority, language: v.language, total_usd: data.cost.total, from: over.from || "" });
     } catch {
       setError(t.error);
     } finally {
       setLoading(false);
     }
   }
+
+  // 계산기 등에서 ?desc=&mau=&from= 으로 넘어오면 채워 넣고 바로 추천을 받는다
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const desc = (q.get("desc") || "").slice(0, 300);
+    if (!desc.trim()) return;
+    const m = Number(q.get("mau"));
+    const v = { description: desc, from: q.get("from") || "link" };
+    if ([100, 1000, 10000, 100000].includes(m)) v.mau = m;
+    setDescription(v.description);
+    if (v.mau) setMau(v.mau);
+    submit(v);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const link = (item) => item?.affiliate || null;
 
@@ -110,7 +126,7 @@ export default function BuildStack() {
       <div style={{ marginTop: 12, fontSize: 13, color: "#555" }}>{t.language}</div>
       <Segmented block value={language} onChange={setLanguage} options={[{ label: "Python", value: "python" }, { label: "TypeScript", value: "typescript" }]} />
 
-      <Button type="primary" size="large" block style={{ marginTop: 20 }} loading={loading} onClick={submit}>{loading ? t.loading : t.go}</Button>
+      <Button type="primary" size="large" block style={{ marginTop: 20 }} loading={loading} onClick={() => submit()}>{loading ? t.loading : t.go}</Button>
 
       {error && <Alert style={{ marginTop: 16 }} type="error" message={error} showIcon />}
 

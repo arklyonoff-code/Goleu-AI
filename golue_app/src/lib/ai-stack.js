@@ -27,14 +27,17 @@ export const PRICES = {
     railway: "https://docs.railway.com/pricing",
   },
   // USD / 1M tokens. tier 는 같은 회사 안의 가격 순서 기준(품질 평가가 아님).
+  // cacheRead = 캐시 적중 입력 단가, cacheWrite = 캐시 쓰기 단가(2026-11-23 확인).
+  // cacheWrite 가 없는 모델(OpenAI 자동 캐싱, Gemini 암시적 캐싱)은 쓰기 할증 없이 입력 단가로 계산. Gemini 캐시 저장료는 미반영.
+  // gpt-6-luna 의 cacheRead 는 공식 페이지 Flex 표($0.005, Standard의 절반)에서 역산한 값.
   llms: [
-    { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, note: { ko: "프롬프트 10만 토큰 이하 기준", en: "for prompts up to 100K tokens" }, src: "anthropic", affiliate: null },
-    { id: "gpt-6-luna", name: "GPT-6 Luna", vendor: "OpenAI", tier: "economy", input: 0.10, output: 0.50, src: "openai", affiliate: null },
-    { id: "gpt-6.1-terra", name: "GPT-6.1 Terra", vendor: "OpenAI", tier: "balanced", input: 1.00, output: 5.00, src: "openai", affiliate: null },
-    { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash", vendor: "Google", tier: "balanced", input: 0.75, output: 3.75, until: "2026-12-31", after: { input: 1.50, output: 7.50 }, note: { ko: "2026-12-31까지 할인가, 2027-01-01부터 $1.50 / $7.50", en: "promo price through 2026-12-31, then $1.50 / $7.50" }, src: "google", affiliate: null },
-    { id: "claude-sonnet-5.5", name: "Claude Sonnet 5.5", vendor: "Anthropic", tier: "balanced", input: 2.00, output: 10.00, src: "anthropic", affiliate: null },
-    { id: "claude-opus-5.5", name: "Claude Opus 5.5", vendor: "Anthropic", tier: "premium", input: 4.00, output: 20.00, src: "anthropic", affiliate: null },
-    { id: "gpt-6.2-astra", name: "GPT-6.2 Astra", vendor: "OpenAI", tier: "premium", input: 8.00, output: 40.00, src: "openai", affiliate: null },
+    { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, cacheRead: 0.01, cacheWrite: 0.125, note: { ko: "프롬프트 10만 토큰 이하 기준", en: "for prompts up to 100K tokens" }, src: "anthropic", affiliate: null },
+    { id: "gpt-6-luna", name: "GPT-6 Luna", vendor: "OpenAI", tier: "economy", input: 0.10, output: 0.50, cacheRead: 0.01, src: "openai", affiliate: null },
+    { id: "gpt-6.1-terra", name: "GPT-6.1 Terra", vendor: "OpenAI", tier: "balanced", input: 1.00, output: 5.00, cacheRead: 0.05, src: "openai", affiliate: null },
+    { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash", vendor: "Google", tier: "balanced", input: 0.75, output: 3.75, cacheRead: 0.075, until: "2026-12-31", after: { input: 1.50, output: 7.50, cacheRead: 0.15 }, note: { ko: "2026-12-31까지 할인가, 2027-01-01부터 $1.50 / $7.50", en: "promo price through 2026-12-31, then $1.50 / $7.50" }, src: "google", affiliate: null },
+    { id: "claude-sonnet-5.5", name: "Claude Sonnet 5.5", vendor: "Anthropic", tier: "balanced", input: 2.00, output: 10.00, cacheRead: 0.10, cacheWrite: 2.50, src: "anthropic", affiliate: null },
+    { id: "claude-opus-5.5", name: "Claude Opus 5.5", vendor: "Anthropic", tier: "premium", input: 4.00, output: 20.00, cacheRead: 0.20, cacheWrite: 5.00, src: "anthropic", affiliate: null },
+    { id: "gpt-6.2-astra", name: "GPT-6.2 Astra", vendor: "OpenAI", tier: "premium", input: 8.00, output: 40.00, cacheRead: 0.40, src: "openai", affiliate: null },
   ],
   vectorDbs: {
     supabaseFree: { name: "Supabase pgvector (Free)", monthly: 0, note: { ko: "DB 500MB, 7일 미사용 시 일시정지", en: "500MB DB, pauses after 7 idle days" }, src: "supabase", affiliate: null },
@@ -51,10 +54,11 @@ export const PRICES = {
 };
 
 // 용도별 요청 1건당 토큰과 사용자 1명의 월 요청 수 (가정. 결과 화면에 그대로 보여준다)
+// cache: 계산기(/llm-cost)의 캐싱 기본값(가정). 반복 앞부분이 큰 RAG·에이전트에만 둔다
 export const USE_CASES = {
   chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
-  rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" } },
-  agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
+  rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, cache: { prefix: 0.3, expiry: 0.5 }, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" } },
+  agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, cache: { prefix: 0.8, expiry: 0.1 }, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
   extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "Official SDK + Pydantic structured output", typescript: "Vercel AI SDK (generateObject)" } },
   generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
 };
@@ -81,8 +85,17 @@ const round = (n) => Math.round(n * 100) / 100;
 
 // 할인가 기간이 끝난 모델은 이후 가격으로 계산한다
 export function effectivePrice(model, today = new Date().toISOString().slice(0, 10)) {
-  if (model.until && model.after && today > model.until) return { ...model, input: model.after.input, output: model.after.output, note: null };
+  if (model.until && model.after && today > model.until) return { ...model, input: model.after.input, output: model.after.output, cacheRead: model.after.cacheRead ?? model.cacheRead, note: null };
   return model;
+}
+
+// 요청당 입력 1M 토큰의 실효 단가.
+// prefix(0~1): 입력 중 매 요청 반복되는 앞부분(시스템 프롬프트·이전 대화) 비율 → 캐시 대상
+// expiry(0~1): 그 앞부분이 캐시 만료로 다시 쓰이는 비율(요청 간격 > 캐시 유지 시간, 첫 요청 포함)
+export function inputRate(model, prefix = 0, expiry = 0) {
+  if (model.cacheRead == null || !prefix) return model.input;
+  const write = model.cacheWrite ?? model.input;
+  return (1 - prefix) * model.input + prefix * ((1 - expiry) * model.cacheRead + expiry * write);
 }
 
 function llmCost(model, requests, uc) {

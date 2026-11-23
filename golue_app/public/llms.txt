@@ -8,7 +8,6 @@ Goleu AI requires no sign-up. You write one sentence, choose monthly active user
 
 - [Home](%SITE_URL%/): What Goleu AI does, how it works, and FAQ
 - [AI stack recommender](%SITE_URL%/build): One-line description to stack and monthly cost
-- [LLM API cost calculator](%SITE_URL%/llm-cost): Monthly cost of major LLM APIs from daily requests and tokens
-- [Team SaaS quiz](%SITE_URL%/quiz): Legacy SaaS stack quiz for teams
+- [LLM API cost calculator](%SITE_URL%/llm-cost): Monthly cost of major LLM APIs from daily requests and tokens, with prompt-caching estimates for RAG and agent workloads
 - [Privacy Policy](%SITE_URL%/privacy): What data is collected and how long it is kept (Korean)
 - [Terms of Service](%SITE_URL%/terms): Terms of use (Korean)
