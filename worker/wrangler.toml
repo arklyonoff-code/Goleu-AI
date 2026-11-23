@@ -1,0 +1,26 @@
+# Cloudflare Worker 설정
+# 참고: https://developers.cloudflare.com/workers/configuration/
+
+name = "toolfit-api"
+main = "index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── 비밀 환경변수 (wrangler secret 명령으로 등록) ─────────────────────────
+# wrangler secret put ANTHROPIC_API_KEY
+# → 입력 창이 뜨면 Anthropic API 키 붙여넣기
+
+# ─── KV 캐싱 (선택사항, 없어도 동작) ──────────────────────────────────────
+# 아래 KV를 사용하려면:
+#   1. wrangler kv namespace create TOOLFIT_KV
+#   2. 출력된 id를 아래에 붙여넣기
+#   3. 주석 해제
+#
+# [[kv_namespaces]]
+# binding = "TOOLFIT_KV"
+# id = "여기에_KV_NAMESPACE_ID_입력"
+
+# ─── 개발 서버 설정 ────────────────────────────────────────────────────────
+[dev]
+port = 8787
+local_protocol = "http"
