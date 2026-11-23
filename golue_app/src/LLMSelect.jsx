@@ -6,8 +6,8 @@ import { trackEvent, Events } from "./lib/analytics";
 import { useLanguage } from "./lib/LanguageContext";
 
 const LLMS = [
-  { key: "openai",     name: "OpenAI",           desc: "GPT-4 · DALL-E · 가장 범용적", price: "$0.03/1K",  color: "#00A67E", popular: true },
-  { key: "anthropic",  name: "Anthropic Claude", desc: "Claude 3 · 분석·글쓰기 특화",  price: "$0.025/1K", color: "#D97706", popular: true },
+  { key: "openai",     name: "OpenAI GPT",       desc: "GPT · 이미지 생성 · 가장 범용적", price: "$0.03/1K",  color: "#00A67E", popular: true },
+  { key: "anthropic",  name: "Anthropic Claude", desc: "Claude · 분석·글쓰기 특화",  price: "$0.025/1K", color: "#D97706", popular: true },
   { key: "google",     name: "Google Gemini",    desc: "멀티모달 · 검색 연동",          price: "$0.02/1K",  color: "#4285F4" },
   { key: "cohere",     name: "Cohere",           desc: "기업용 NLP · 검색·요약 특화",   price: "$0.015/1K", color: "#9333EA" },
   { key: "opensource", name: "오픈소스 모델",    desc: "Llama · Mistral · 완전 커스텀", price: "호스팅만",  color: "#059669" },
