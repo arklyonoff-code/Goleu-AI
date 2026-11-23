@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 
 // 프리렌더(SSG) 대상. src/routes.jsx 의 PRERENDER_PATHS 와 동일하게 유지
-const PRERENDER_PATHS = ['/', '/privacy', '/terms']
+const PRERENDER_PATHS = ['/', '/build', '/llm-cost', '/privacy', '/terms']
 
 // 흐름 페이지(/quiz, /result/:id 등)용 클라이언트 전용 셸.
 // data-server-rendered 가 없으므로 클라이언트가 hydrate 대신 새로 render 한다.

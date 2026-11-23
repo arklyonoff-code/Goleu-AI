@@ -1,12 +1,14 @@
 # Goleu AI
 
-> Goleu AI is a free tool that recommends the best SaaS stack for your team based on team roles, budget, and current tools.
+> Goleu AI is a free tool for AI builders: describe the AI app you want to build in one line and get an LLM, framework, vector database and hosting stack with an estimated monthly cost.
 
-Goleu AI is completely free and requires no sign-up. You answer four short steps (team roles and headcount, the tools you already use, cloud & infrastructure, and AI services), which takes about 3 minutes on average, and get SaaS recommendations for collaboration, development, design, and AI.
+Goleu AI requires no sign-up. You write one sentence, choose monthly active users (100 to 100,000) and a priority (lowest cost, balanced, best quality), and get a stack recommendation in about 10 seconds. Monthly costs are calculated from official pricing pages; each result shows the assumptions (requests per user, tokens per request) and the date prices were checked. Some links may be affiliate links; rankings do not depend on them.
 
 ## Main pages
 
 - [Home](%SITE_URL%/): What Goleu AI does, how it works, and FAQ
-- [Start the quiz](%SITE_URL%/quiz): Step 1 of the recommendation flow
+- [AI stack recommender](%SITE_URL%/build): One-line description to stack and monthly cost
+- [LLM API cost calculator](%SITE_URL%/llm-cost): Monthly cost of major LLM APIs from daily requests and tokens
+- [Team SaaS quiz](%SITE_URL%/quiz): Legacy SaaS stack quiz for teams
 - [Privacy Policy](%SITE_URL%/privacy): What data is collected and how long it is kept (Korean)
 - [Terms of Service](%SITE_URL%/terms): Terms of use (Korean)

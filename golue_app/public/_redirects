@@ -1,1 +1,5 @@
-/* /index.html 200
+/build /build/index.html 200
+/llm-cost /llm-cost/index.html 200
+/privacy /privacy/index.html 200
+/terms /terms/index.html 200
+/* /app.html 200

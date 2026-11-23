@@ -11,6 +11,8 @@ import MyPage from "./MyPage";
 import PrivacyPolicy from "./PrivacyPolicy";
 import TermsOfService from "./TermsOfService";
 import Seo from "./components/Seo";
+import BuildStack from "./BuildStack";
+import LlmCost from "./LlmCost";
 
 /** 흐름 페이지: noindex + 기본 제목 */
 function FlowSeo({ title }) {
@@ -152,6 +154,28 @@ export function TermsRoute() {
         lang="ko"
       />
       <TermsOfService />
+    </>
+  );
+}
+
+export function BuildRoute() {
+  return (
+    <>
+      <Seo title="AI stack recommender — Goleu AI" description="Describe the AI app you want to build in one line and get an LLM, framework, vector DB and hosting stack with an estimated monthly cost." path="/build" />
+      <BuildStack />
+    </>
+  );
+}
+
+export function LlmCostRoute() {
+  return (
+    <>
+      <Seo
+        title="LLM API monthly cost calculator — Goleu AI"
+        description="Compare the monthly cost of OpenAI, Anthropic and Google models from your daily requests and tokens per request. Official list prices with the date checked."
+        path="/llm-cost"
+      />
+      <LlmCost />
     </>
   );
 }

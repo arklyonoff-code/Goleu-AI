@@ -14,7 +14,7 @@ export function buildLandingJsonLd() {
       name: "Goleu AI",
       url: `${SITE_URL}/`,
       description: en.landingDefinition,
-      applicationCategory: "BusinessApplication",
+      applicationCategory: "DeveloperApplication",
       operatingSystem: "Web",
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     },

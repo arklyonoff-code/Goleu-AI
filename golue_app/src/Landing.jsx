@@ -76,14 +76,14 @@ function ToolCard({ tool, lang }) {
             }}>
               {tool.price}
             </span>
-            <span style={{
+            {tool.korean !== undefined && <span style={{
               fontFamily: "var(--font-mono)", fontSize: 11,
               color: tool.korean ? "#06b6d4" : "var(--text-muted)",
               background: tool.korean ? "#06b6d418" : "var(--bg-elevated)",
               padding: "2px 8px", borderRadius: 4,
             }}>
               {tool.korean ? koreanYes : koreanNo}
-            </span>
+            </span>}
           </div>
         </div>
       </div>
@@ -131,7 +131,7 @@ export default function Landing() {
 
   const handleStart = () => {
     trackEvent(Events.QUIZ_STARTED, { entry_step: "landing" });
-    navigate("/quiz");
+    navigate("/build");
   };
 
   const HOW_IT_WORKS = useMemo(() => [
@@ -154,31 +154,25 @@ export default function Landing() {
   ], [t]);
 
   const SAMPLE_TOOLS = useMemo(() => lang === "ko" ? [
-    { name: "Notion", category: "문서·노트", free: true, price: "Free ~ $10/인", korean: true,
-      reason: "한국어 지원이 가장 좋고 무료 티어로 시작해 팀 성장에 따라 확장하기 좋습니다.", accent: "#6366f1" },
-    { name: "Linear", category: "프로젝트", free: true, price: "Free ~ $10/인", korean: false,
-      reason: "개발팀 이슈 관리 최강. Slack·GitHub 연동이 즉시 됩니다.", accent: "#8b5cf6" },
-    { name: "Slack", category: "커뮤니케이션", free: true, price: "Free ~ $7.25/인", korean: true,
-      reason: "이미 도입했을 확률이 높은 표준. 무료 티어로도 90일치 메시지가 보존됩니다.", accent: "#06b6d4" },
+    { name: "Gemini 3.7 Flash", category: "LLM", free: false, price: "약 $98/월", reason: "균형 등급 중 현재 가장 저렴합니다(2026-12-31까지 할인가). 이후에는 GPT-6.1 Terra가 더 저렴해집니다.", accent: "#6366f1" },
+    { name: "LlamaIndex", category: "프레임워크", free: true, price: "오픈소스", reason: "문서 적재·분할·검색 파이프라인을 바로 쓸 수 있어 RAG 구현이 빠릅니다.", accent: "#8b5cf6" },
+    { name: "Supabase pgvector", category: "벡터 DB", free: true, price: "$0 (Free)", reason: "월 사용자 1,000명 규모면 무료 플랜으로 시작할 수 있습니다.", accent: "#06b6d4" },
   ] : [
-    { name: "Notion", category: "Docs & Notes", free: true, price: "Free ~ $10/user", korean: true,
-      reason: "Best Korean language support with a free tier that scales as your team grows.", accent: "#6366f1" },
-    { name: "Linear", category: "Project Mgmt", free: true, price: "Free ~ $10/user", korean: false,
-      reason: "Top issue tracker for dev teams. Instant Slack & GitHub integrations.", accent: "#8b5cf6" },
-    { name: "Slack", category: "Communication", free: true, price: "Free ~ $7.25/user", korean: true,
-      reason: "The industry standard. Free tier keeps 90 days of message history.", accent: "#06b6d4" },
+    { name: "Gemini 3.7 Flash", category: "LLM", free: false, price: "~$98/mo", reason: "Currently the cheapest balanced-tier model (promo price through Dec 31, 2026); after that GPT-6.1 Terra becomes cheaper.", accent: "#6366f1" },
+    { name: "LlamaIndex", category: "Framework", free: true, price: "Open source", reason: "Ready-made ingestion, chunking and retrieval pipelines make RAG fast to build.", accent: "#8b5cf6" },
+    { name: "Supabase pgvector", category: "Vector DB", free: true, price: "$0 (Free)", reason: "At 1,000 monthly users you can start on the free plan.", accent: "#06b6d4" },
   ], [lang]);
 
   const MINI_STACK = useMemo(() => lang === "ko" ? [
-    { name: "Notion", tag: "문서·노트", color: "#6366f1" },
-    { name: "Linear", tag: "프로젝트", color: "#8b5cf6" },
-    { name: "Slack", tag: "커뮤니케이션", color: "#06b6d4" },
-    { name: "Figma", tag: "디자인", color: "#a259ff" },
+    { name: "Gemini 3.7 Flash", tag: "LLM", color: "#6366f1" },
+    { name: "LlamaIndex", tag: "프레임워크", color: "#8b5cf6" },
+    { name: "pgvector", tag: "벡터 DB", color: "#06b6d4" },
+    { name: "Railway", tag: "배포", color: "#a259ff" },
   ] : [
-    { name: "Notion", tag: "Docs", color: "#6366f1" },
-    { name: "Linear", tag: "Projects", color: "#8b5cf6" },
-    { name: "Slack", tag: "Comms", color: "#06b6d4" },
-    { name: "Figma", tag: "Design", color: "#a259ff" },
+    { name: "Gemini 3.7 Flash", tag: "LLM", color: "#6366f1" },
+    { name: "LlamaIndex", tag: "Framework", color: "#8b5cf6" },
+    { name: "pgvector", tag: "Vector DB", color: "#06b6d4" },
+    { name: "Railway", tag: "Hosting", color: "#a259ff" },
   ], [lang]);
 
   const s = {
@@ -204,7 +198,7 @@ export default function Landing() {
   return (
     <div style={{ background: "var(--bg-base)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
       <Seo
-        title="Goleu AI — Find the perfect SaaS stack for your team"
+        title="Goleu AI — AI stack & monthly cost for your app"
         description={`${LANDING_JSON_LD[0].description} No sign-up required.`}
         path="/"
         lang={lang}

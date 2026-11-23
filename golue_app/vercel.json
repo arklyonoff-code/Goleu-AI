@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    { "source": "/build", "destination": "/build/index.html" },
+    { "source": "/llm-cost", "destination": "/llm-cost/index.html" },
     { "source": "/privacy", "destination": "/privacy/index.html" },
     { "source": "/terms", "destination": "/terms/index.html" },
     { "source": "/(.*)", "destination": "/app.html" }

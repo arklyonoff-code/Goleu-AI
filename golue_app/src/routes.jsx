@@ -13,9 +13,11 @@ import {
   MyPageRoute,
   PrivacyRoute,
   TermsRoute,
+  BuildRoute,
+  LlmCostRoute,
 } from "./RouteElements";
 
-export const PRERENDER_PATHS = ["/", "/privacy", "/terms"];
+export const PRERENDER_PATHS = ["/", "/build", "/llm-cost", "/privacy", "/terms"];
 
 export const routes = [
   {
@@ -31,6 +33,8 @@ export const routes = [
       { path: "recommend", element: <RecommendRoute /> },
       { path: "result/:id", element: <SavedResultRoute /> },
       { path: "mypage", element: <MyPageRoute /> },
+      { path: "build", element: <BuildRoute /> },
+      { path: "llm-cost", element: <LlmCostRoute /> },
       { path: "privacy", element: <PrivacyRoute /> },
       { path: "terms", element: <TermsRoute /> },
     ],
