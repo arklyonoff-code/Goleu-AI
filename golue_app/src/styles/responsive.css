@@ -1,0 +1,476 @@
+/* ─── Goleu AI 반응형 레이아웃 ─────────────────────────────────────────── */
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* 공통 페이지 패딩 */
+header:has(> .r-page-header) {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.r-page-header {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.r-section {
+  padding: 100px 40px;
+}
+
+.r-hero-section {
+  padding: 100px 40px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.r-divider-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.r-footer {
+  padding: 32px 40px;
+}
+
+/* ─── 그리드 ─── */
+.r-grid-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.r-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.r-grid-3--steps {
+  margin-top: 60px;
+}
+
+.r-grid-3--preview {
+  gap: 20px;
+}
+
+.r-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 52px;
+}
+
+.r-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.r-grid-2--gap16 {
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.r-grid-2--gap10 {
+  gap: 10px;
+}
+
+.r-grid-tools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.r-grid-hosting {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.r-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+/* ─── 퀴즈 레이아웃 ─── */
+.r-quiz-header {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.r-quiz-body {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 40px 120px;
+  display: grid;
+  gap: 48px;
+  align-items: start;
+}
+
+.r-quiz-body--with-side {
+  grid-template-columns: 1fr 400px;
+}
+
+.r-quiz-body--solo {
+  grid-template-columns: 1fr;
+}
+
+.r-quiz-main {
+  max-width: 720px;
+}
+
+.r-quiz-footer {
+  padding: 14px 40px;
+  background: var(--quiz-footer-bg);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--quiz-footer-border);
+  box-shadow: var(--quiz-footer-shadow);
+}
+
+.r-quiz-next-wrap {
+  flex: 1;
+  max-width: 400px;
+}
+
+/* ─── 결과 / 마이페이지 ─── */
+.r-result-header {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.r-result-nav {
+  flex: 1;
+  min-width: 0;
+}
+
+.r-result-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.r-stats-grid {
+  gap: 16px;
+}
+
+.r-banner-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.r-profile-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.r-mypage-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.r-mypage-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 40px 80px;
+}
+
+.r-result-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 40px 60px;
+  color: var(--text-primary);
+}
+
+.r-cookie-consent {
+  bottom: 16px;
+}
+
+/* ─── 태블릿 (≤1023px) ─── */
+@media (max-width: 1023px) {
+  header:has(> .r-page-header) {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .r-divider-wrap,
+  .r-mypage-header,
+  .r-result-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .r-result-content {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .r-section,
+  .r-hero-section {
+    padding-top: 64px;
+    padding-bottom: 64px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .r-hero-section {
+    padding-bottom: 48px;
+  }
+
+  .r-footer {
+    padding: 24px;
+  }
+
+  .r-grid-hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .r-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .r-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .r-grid-tools {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .r-grid-hosting {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .r-grid-6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .r-quiz-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .r-quiz-body {
+    grid-template-columns: 1fr;
+    padding: 32px 24px 120px;
+    gap: 32px;
+  }
+
+  .r-quiz-side {
+    position: static !important;
+    order: -1;
+  }
+
+  .r-quiz-footer {
+    padding: 14px 24px;
+  }
+}
+
+/* ─── 모바일 (≤767px) ─── */
+@media (max-width: 767px) {
+  header:has(> .r-page-header) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .r-divider-wrap,
+  .r-mypage-header,
+  .r-result-header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .r-result-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .r-section,
+  .r-hero-section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .r-footer {
+    padding: 24px 16px;
+  }
+
+  .r-grid-3,
+  .r-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .r-grid-3--steps {
+    margin-top: 36px;
+  }
+
+  .r-grid-4 {
+    margin-top: 32px;
+  }
+
+  .r-grid-2,
+  .r-grid-2--gap16,
+  .r-grid-2--gap10 {
+    grid-template-columns: 1fr;
+  }
+
+  .r-grid-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .r-grid-hosting {
+    grid-template-columns: 1fr;
+  }
+
+  .r-grid-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .r-quiz-header {
+    padding-left: 16px;
+    padding-right: 16px;
+    height: 56px;
+  }
+
+  .r-quiz-step-label {
+    display: none;
+  }
+
+  .r-step-connector {
+    display: none !important;
+  }
+
+  .r-quiz-body {
+    padding: 24px 16px 110px;
+    gap: 24px;
+  }
+
+  .r-quiz-footer {
+    padding: 12px 16px;
+  }
+
+  .r-quiz-next-wrap {
+    max-width: none;
+  }
+
+  .r-quiz-back-label {
+    display: none;
+  }
+
+  .r-result-nav {
+    display: none;
+  }
+
+  .r-result-logo {
+    margin-right: auto !important;
+  }
+
+  .r-result-hide-sm {
+    display: none !important;
+  }
+
+  .r-result-actions {
+    gap: 8px;
+  }
+
+  .r-banner-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .r-banner-img {
+    margin-left: 0 !important;
+    width: 64px !important;
+    align-self: center;
+  }
+
+  .r-mypage-content {
+    padding: 24px 16px 60px;
+  }
+
+  .r-profile-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .r-profile-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .r-landing-cta-btn {
+    height: 48px !important;
+    padding: 0 24px !important;
+    font-size: 15px !important;
+  }
+
+  .r-cookie-consent {
+    bottom: 80px;
+    left: 12px;
+    right: 12px;
+  }
+}
+
+/* ─── 소형 모바일 (≤479px) ─── */
+@media (max-width: 479px) {
+  .r-grid-6 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .r-landing-header-actions {
+    gap: 8px;
+  }
+
+  .r-landing-cta-short {
+    padding: 0 12px !important;
+    font-size: 13px !important;
+  }
+
+  .r-hero-cta {
+    flex-direction: column;
+    align-items: stretch !important;
+    width: 100%;
+  }
+
+  .r-hero-cta .r-hero-cta-btn {
+    width: 100%;
+  }
+}
+
+@supports (padding: max(0px)) {
+  .r-quiz-footer {
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+  }
+}

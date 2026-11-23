@@ -1,0 +1,123 @@
+/*
+ * Goleu — 버튼 디자인 시스템
+ * Ant Design v5 ConfigProvider 토큰으로 제어되지 않는 hover 트랜지션을 보완합니다.
+ *
+ * 토큰 (ConfigProvider에서 관리):
+ *   colorPrimary:  #6366f1  (indigo-500)
+ *   borderRadius:  8
+ *   fontWeight:    600
+ *
+ * hover 색상:
+ *   primary hover bg:   #4f46e5  (indigo-600)
+ *   default hover border/text: #6366f1
+ *   ghost hover bg:     #f0f0ff
+ */
+
+/* ─── 공통 트랜지션 ─────────────────────────────────────────────────────────── */
+.ant-btn {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease !important;
+  font-family: 'Pretendard', -apple-system, sans-serif !important;
+}
+
+/* ─── Primary 버튼 ────────────────────────────────────────────────────────── */
+.ant-btn-primary {
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.2) !important;
+}
+.ant-btn-primary:hover:not(:disabled) {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35) !important;
+  transform: translateY(-1px);
+}
+.ant-btn-primary:active:not(:disabled) {
+  background-color: #4338ca !important;
+  border-color: #4338ca !important;
+  transform: translateY(0);
+  box-shadow: none !important;
+}
+
+/* ─── Default 버튼 ────────────────────────────────────────────────────────── */
+.ant-btn-default:hover:not(:disabled) {
+  border-color: #6366f1 !important;
+  color: #6366f1 !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12) !important;
+}
+.ant-btn-default:active:not(:disabled) {
+  border-color: #4f46e5 !important;
+  color: #4f46e5 !important;
+  box-shadow: none !important;
+}
+
+/* ─── Danger 버튼 ─────────────────────────────────────────────────────────── */
+.ant-btn-dangerous:hover:not(:disabled) {
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+  transform: translateY(-1px);
+}
+.ant-btn-dangerous:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none !important;
+}
+
+/* ─── Ghost / Text 버튼 ──────────────────────────────────────────────────── */
+.ant-btn-text:hover:not(:disabled) {
+  background-color: #f0f0ff !important;
+  color: #6366f1 !important;
+}
+
+/* ─── Circle / Icon 버튼 (스텝퍼 +/-) ────────────────────────────────────── */
+.ant-btn-circle:hover:not(:disabled) {
+  border-color: #6366f1 !important;
+  color: #6366f1 !important;
+}
+
+/* ─── Large 버튼 공통 ─────────────────────────────────────────────────────── */
+.ant-btn-lg {
+  font-weight: 600 !important;
+}
+
+/* ─── 툴 선택 버튼 (ToolSelect) — 선택됨 hover ──────────────────────────── */
+.gl-tool-btn.ant-btn-primary:hover:not(:disabled) {
+  background-color: #eef2ff !important;
+  border-color: #6366f1 !important;
+  color: #4f46e5 !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15) !important;
+  transform: none;
+}
+
+/* ─── 카드 내 행 hover (ComboCard, MyPage 툴 행) ─────────────────────────── */
+.gl-row-hover {
+  transition: background 0.15s ease, border-radius 0.15s ease;
+  border-radius: 8px;
+}
+.gl-row-hover:hover {
+  background: #f5f5ff !important;
+}
+
+/* ─── 선택형 카드 버튼 (Cloud, LLM 선택) ─────────────────────────────────── */
+.gl-select-card {
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease !important;
+  cursor: pointer;
+}
+.gl-select-card:hover {
+  border-color: #6366f1 !important;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.12) !important;
+}
+.gl-select-card.selected {
+  border-color: #6366f1 !important;
+  background-color: #f0f0ff !important;
+}
+
+/* ─── 비활성(disabled) 상태 — hover 효과 없음 ──────────────────────────── */
+.ant-btn:disabled,
+.ant-btn-disabled {
+  transform: none !important;
+  box-shadow: none !important;
+}
