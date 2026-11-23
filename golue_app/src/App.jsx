@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { StrictMode, useEffect, useState } from "react";
 import { ConfigProvider } from "antd";
 import CookieConsent from "./components/CookieConsent";
+import { Analytics } from "@vercel/analytics/react";
 import { trackPageView } from "./lib/analytics";
 import { LanguageProvider } from "./lib/LanguageContext";
 
@@ -114,6 +115,8 @@ function App() {
       <RouteTracker />
       <Outlet context={quiz} />
       <CookieConsent />
+      {/* Vercel Web Analytics: 쿠키 없이 페이지뷰만 수집 (Hobby 무료 범위, 커스텀 이벤트는 GA4) */}
+      <Analytics />
     </ConfigProvider>
     </LanguageProvider>
     </StrictMode>
