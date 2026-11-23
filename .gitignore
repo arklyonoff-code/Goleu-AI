@@ -33,3 +33,6 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+
+# golue_app 공개 설정(.env는 비밀값 없이 VITE_SITE_URL만 둔다)
+!golue_app/.env
