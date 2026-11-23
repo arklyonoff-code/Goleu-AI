@@ -43,6 +43,7 @@ const T = {
   },
 };
 
+const noteText = (n, ko) => (!n ? "" : typeof n === "string" ? n : n[ko ? "ko" : "en"]);
 const usd = (n) => `$${Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
 function Row({ label, name, value, note, href }) {
@@ -119,11 +120,11 @@ export default function BuildStack() {
           <div style={{ margin: "12px 0 4px", fontSize: 13, color: "#888" }}>{t.total}</div>
           <div style={{ fontSize: 32, fontWeight: 700 }}>{usd(result.cost.total)}<span style={{ fontSize: 14, color: "#888" }}> / mo</span></div>
 
-          <Row label={t.llm} name={`${result.llm.name} (${result.llm.vendor})`} value={result.cost.llm} note={`$${result.llm.input} / $${result.llm.output} per 1M tokens${result.llm.note ? ` · ${result.llm.note}` : ""}`} href={link(result.llm)} />
+          <Row label={t.llm} name={`${result.llm.name} (${result.llm.vendor})`} value={result.cost.llm} note={`$${result.llm.input} / $${result.llm.output} per 1M tokens${result.llm.note ? ` · ${noteText(result.llm.note, lang === "ko")}` : ""}`} href={link(result.llm)} />
           {result.alternativeLlm && <Row label={t.alt} name={`${result.alternativeLlm.name} (${result.alternativeLlm.vendor})`} value={result.alternativeLlm.monthly} href={link(result.alternativeLlm)} />}
           <Row label={t.framework} name={result.framework} />
-          {result.vectorDb && <Row label={t.vector} name={result.vectorDb.name} value={result.cost.vectorDb} note={result.vectorDb.note} href={link(result.vectorDb)} />}
-          <Row label={t.hosting} name={result.hosting.name} value={result.cost.hosting} note={result.hosting.note} href={link(result.hosting)} />
+          {result.vectorDb && <Row label={t.vector} name={result.vectorDb.name} value={result.cost.vectorDb} note={noteText(result.vectorDb.note, lang === "ko")} href={link(result.vectorDb)} />}
+          <Row label={t.hosting} name={result.hosting.name} value={result.cost.hosting} note={noteText(result.hosting.note, lang === "ko")} href={link(result.hosting)} />
 
           <p style={{ fontSize: 12, color: "#888", marginTop: 12 }}>{t.assumptions(result.assumptions)}</p>
           <p style={{ fontSize: 12, color: "#888" }}>{t.asOf(result.asOf)}</p>

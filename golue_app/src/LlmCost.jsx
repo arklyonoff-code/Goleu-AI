@@ -34,6 +34,7 @@ const T = {
 };
 
 const TIER_COLOR = { economy: "green", balanced: "blue", premium: "purple" };
+const noteText = (n, ko) => (!n ? "" : typeof n === "string" ? n : n[ko ? "ko" : "en"]);
 const usd = (n) => `$${n.toLocaleString(undefined, { maximumFractionDigits: n < 10 ? 2 : 0 })}`;
 
 export default function LlmCost() {
@@ -69,7 +70,7 @@ export default function LlmCost() {
   }, [perDay, inTok, outTok]);
 
   const columns = [
-    { title: t.model, dataIndex: "name", render: (v, r) => <div><b>{v}</b><div style={{ fontSize: 12, color: "#888" }}>{r.vendor}{r.note ? ` · ${r.note}` : ""}</div></div> },
+    { title: t.model, dataIndex: "name", render: (v, r) => <div><b>{v}</b><div style={{ fontSize: 12, color: "#888" }}>{r.vendor}{r.note ? ` · ${noteText(r.note, ko)}` : ""}</div></div> },
     { title: t.tier, dataIndex: "tier", render: (v) => <Tag color={TIER_COLOR[v]}>{t.tiers[v]}</Tag> },
     { title: t.price, dataIndex: "price", responsive: ["sm"] },
     { title: t.monthly, dataIndex: "monthly", align: "right", render: (v) => <b>{usd(v)}</b> },

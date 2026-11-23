@@ -28,23 +28,23 @@ export const PRICES = {
   },
   // USD / 1M tokens. tier 는 같은 회사 안의 가격 순서 기준(품질 평가가 아님).
   llms: [
-    { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, note: "프롬프트 10만 토큰 이하 기준", src: "anthropic", affiliate: null },
+    { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, note: { ko: "프롬프트 10만 토큰 이하 기준", en: "for prompts up to 100K tokens" }, src: "anthropic", affiliate: null },
     { id: "gpt-6-luna", name: "GPT-6 Luna", vendor: "OpenAI", tier: "economy", input: 0.10, output: 0.50, src: "openai", affiliate: null },
     { id: "gpt-6.1-terra", name: "GPT-6.1 Terra", vendor: "OpenAI", tier: "balanced", input: 1.00, output: 5.00, src: "openai", affiliate: null },
-    { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash", vendor: "Google", tier: "balanced", input: 0.75, output: 3.75, until: "2026-12-31", after: { input: 1.50, output: 7.50 }, note: "2026-12-31까지 할인가, 2027-01-01부터 $1.50 / $7.50", src: "google", affiliate: null },
+    { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash", vendor: "Google", tier: "balanced", input: 0.75, output: 3.75, until: "2026-12-31", after: { input: 1.50, output: 7.50 }, note: { ko: "2026-12-31까지 할인가, 2027-01-01부터 $1.50 / $7.50", en: "promo price through 2026-12-31, then $1.50 / $7.50" }, src: "google", affiliate: null },
     { id: "claude-sonnet-5.5", name: "Claude Sonnet 5.5", vendor: "Anthropic", tier: "balanced", input: 2.00, output: 10.00, src: "anthropic", affiliate: null },
     { id: "claude-opus-5.5", name: "Claude Opus 5.5", vendor: "Anthropic", tier: "premium", input: 4.00, output: 20.00, src: "anthropic", affiliate: null },
     { id: "gpt-6.2-astra", name: "GPT-6.2 Astra", vendor: "OpenAI", tier: "premium", input: 8.00, output: 40.00, src: "openai", affiliate: null },
   ],
   vectorDbs: {
-    supabaseFree: { name: "Supabase pgvector (Free)", monthly: 0, note: "DB 500MB, 7일 미사용 시 일시정지", src: "supabase", affiliate: null },
-    supabasePro: { name: "Supabase pgvector (Pro)", monthly: 25, note: "DB 8GB 포함, 초과 사용량 별도", src: "supabase", affiliate: null },
-    qdrantFree: { name: "Qdrant Cloud (Free)", monthly: 0, note: "1GB RAM 단일 노드, 768차원 약 100만 벡터", src: "qdrant", affiliate: null },
-    pineconeStandard: { name: "Pinecone (Standard)", monthly: 50, note: "월 최소 $50, 초과분은 사용량 과금", src: "pinecone", affiliate: null },
+    supabaseFree: { name: "Supabase pgvector (Free)", monthly: 0, note: { ko: "DB 500MB, 7일 미사용 시 일시정지", en: "500MB DB, pauses after 7 idle days" }, src: "supabase", affiliate: null },
+    supabasePro: { name: "Supabase pgvector (Pro)", monthly: 25, note: { ko: "DB 8GB 포함, 초과 사용량 별도", en: "8GB DB included, overage billed" }, src: "supabase", affiliate: null },
+    qdrantFree: { name: "Qdrant Cloud (Free)", monthly: 0, note: { ko: "1GB RAM 단일 노드, 768차원 약 100만 벡터", en: "1GB RAM single node, ~1M 768-dim vectors" }, src: "qdrant", affiliate: null },
+    pineconeStandard: { name: "Pinecone (Standard)", monthly: 50, note: { ko: "월 최소 $50, 초과분은 사용량 과금", en: "$50/month minimum, then usage-based" }, src: "pinecone", affiliate: null },
   },
   hosting: {
-    free: { name: "Cloudflare Workers (Free)", monthly: 0, includedRequests: 3_000_000, note: "하루 10만 요청 한도", src: "cloudflare" },
-    paid: { name: "Cloudflare Workers (Paid)", monthly: 5, includedRequests: 10_000_000, overPerMillion: 0.30, note: "월 1,000만 요청 포함", src: "cloudflare" },
+    free: { name: "Cloudflare Workers (Free)", monthly: 0, includedRequests: 3_000_000, note: { ko: "하루 10만 요청 한도", en: "100K requests/day limit" }, src: "cloudflare" },
+    paid: { name: "Cloudflare Workers (Paid)", monthly: 5, includedRequests: 10_000_000, overPerMillion: 0.30, note: { ko: "월 1,000만 요청 포함", en: "10M requests/month included" }, src: "cloudflare" },
     // Railway Hobby: 월 $5(사용량 $5 포함), 서비스 사용량 vCPU $20/월, 메모리 $10/GB·월
     railway: { name: "Railway (Hobby)", minimum: 5, perVcpu: 20, perGbRam: 10, src: "railway", affiliate: null },
   },
@@ -52,11 +52,11 @@ export const PRICES = {
 
 // 용도별 요청 1건당 토큰과 사용자 1명의 월 요청 수 (가정. 결과 화면에 그대로 보여준다)
 export const USE_CASES = {
-  chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + 공식 SDK", typescript: "Vercel AI SDK" } },
+  chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
   rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" } },
   agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
-  extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "공식 SDK + Pydantic 구조화 출력", typescript: "Vercel AI SDK (generateObject)" } },
-  generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + 공식 SDK", typescript: "Vercel AI SDK" } },
+  extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "Official SDK + Pydantic structured output", typescript: "Vercel AI SDK (generateObject)" } },
+  generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
 };
 
 const KEYWORDS = {
@@ -110,7 +110,7 @@ const RAILWAY_USAGE = { 100: { vcpu: 0.1, ram: 0.5 }, 1000: { vcpu: 0.1, ram: 0.
 function pickRailway(mau) {
   const r = PRICES.hosting.railway, u = RAILWAY_USAGE[mau];
   const usage = u.vcpu * r.perVcpu + u.ram * r.perGbRam;
-  return { ...r, cost: round(Math.max(r.minimum, usage)), note: `추정 평균 ${u.vcpu} vCPU · ${u.ram}GB RAM 기준, 월 $5(사용량 $5 포함)` };
+  return { ...r, cost: round(Math.max(r.minimum, usage)), note: { ko: `추정 평균 ${u.vcpu} vCPU · ${u.ram}GB RAM 기준, 월 $5(사용량 $5 포함)`, en: `estimated avg ${u.vcpu} vCPU · ${u.ram}GB RAM, $5/month incl. $5 usage` } };
 }
 
 function pickHosting(requests, useCase) {
