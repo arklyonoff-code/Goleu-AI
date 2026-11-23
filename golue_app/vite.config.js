@@ -18,7 +18,24 @@ export default defineConfig(({ mode }) => {
   let shellWritten = false
 
   return {
-    plugins: [react(), svgr()],
+    plugins: [
+      react(),
+      svgr(),
+      {
+        // `npm run preview` 를 vercel.json 과 같은 규칙으로: 파일 → 프리렌더 HTML → app.html
+        name: 'goleu-preview-spa-shell',
+        configurePreviewServer(server) {
+          server.middlewares.use((req, _res, next) => {
+            const pathname = (req.url || '/').split('?')[0]
+            const route = pathname.replace(/\/$/, '') || '/'
+            if (path.extname(pathname)) return next()
+            if (route === '/') return next()
+            req.url = PRERENDER_PATHS.includes(route) ? `${route}/index.html` : '/' + SPA_SHELL
+            next()
+          })
+        },
+      },
+    ],
     base: '/',
     ssgOptions: {
       entry: 'src/main.jsx',
