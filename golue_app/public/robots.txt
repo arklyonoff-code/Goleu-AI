@@ -1,0 +1,59 @@
+# Goleu AI — robots.txt
+# %SITE_URL% 는 빌드 시 VITE_SITE_URL 로 치환됩니다 (vite.config.js)
+
+User-agent: GPTBot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: Claude-User
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: Googlebot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: Bingbot
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+User-agent: *
+Allow: /
+Disallow: /result/
+Disallow: /mypage
+
+Sitemap: %SITE_URL%/sitemap.xml
