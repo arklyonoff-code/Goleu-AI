@@ -165,4 +165,5 @@ export const Events = Object.freeze({
   CATEGORY_CARD_CLICKED: "category_card_clicked",
   TOOL_SELECTED: "tool_selected",
   TOOL_DESELECTED: "tool_deselected",
+  FAQ_OPENED: "faq_opened",
 });

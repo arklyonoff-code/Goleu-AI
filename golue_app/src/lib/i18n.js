@@ -25,6 +25,7 @@ export const translations = {
     landingH1a:        "우리 팀에 딱 맞는",
     landingH1b:        "SaaS 스택",
     landingH1c:        "을 3분 만에",
+    landingDefinition: "Goleu AI는 팀 구성, 예산, 현재 사용 중인 툴을 바탕으로 우리 팀에 가장 잘 맞는 SaaS 스택을 추천하는 무료 도구입니다.",
     landingSubtitle:   "팀 구성·예산·현재 사용 툴을 알려주면 Goleu가 협업·개발·디자인·AI까지 최적의 SaaS 조합을 골라 드립니다.",
     stat1Val:   "50+", stat1Label: "검토된 SaaS 도구",
     stat2Val:   "3분",  stat2Label: "평균 완료 시간",
@@ -54,6 +55,21 @@ export const translations = {
     cookieBody:    "Goleu AI는 서비스 개선을 위해 익명화된 사용 데이터(페이지 방문, 클릭, 퀴즈 응답)를 수집합니다. 개인 식별 정보는 수집하지 않습니다.",
     cookieAccept:  "동의하고 계속",
     cookieDecline: "거부",
+
+    // ── FAQ (랜딩, JSON-LD FAQPage 와 동일 데이터) ─────────────────────────
+    faqTitle: "자주 묻는 질문",
+    faq1Q: "Goleu AI는 무료인가요?",
+    faq1A: "네. Goleu AI는 완전 무료로 이용할 수 있습니다.",
+    faq2Q: "회원가입이 필요한가요?",
+    faq2A: "아니요. 가입 없이 바로 시작할 수 있습니다. 입력값과 마지막 추천 결과는 사용 중인 브라우저에 저장되어, 같은 기기에서 마이 페이지로 다시 확인할 수 있습니다.",
+    faq3Q: "얼마나 걸리나요?",
+    faq3A: "평균 3분 정도 걸립니다. 팀 구성, 현재 사용 툴, 클라우드·인프라, AI 서비스의 4단계 질문에 답하면 됩니다.",
+    faq4Q: "어떤 정보를 입력하나요?",
+    faq4A: "직군별 인원, 이미 사용 중인 툴, 클라우드 플랫폼·호스팅 형태·월 인프라 예산, AI 활용 목적·예상 사용량·AI 월 예산·AI 플랫폼을 입력합니다. 팀 이름은 선택 사항이며, 이름·이메일·전화번호 같은 개인 식별 정보는 받지 않습니다.",
+    faq5Q: "결과를 저장하거나 공유할 수 있나요?",
+    faq5A: "네. \"내 결과 저장하기\"를 누르면 30일간 유효한 공유 링크가 만들어지고, PDF로 저장할 수도 있습니다. 마이 페이지에서는 리포트(HTML)와 JSON 파일로 내려받을 수 있습니다.",
+    faq6Q: "누구를 위한 서비스인가요?",
+    faq6A: "협업·개발·디자인·AI 툴을 고르려는 팀을 위한 서비스입니다. 제품, 개발, 디자인, 데이터, 마케팅, 영업, CS, 운영 직군 구성과 예산에 맞춰 SaaS 조합을 추천합니다.",
 
     // ── Step 1 ────────────────────────────────────────────────────────────
     s1Title:        "팀 구성을 알려주세요",
@@ -155,6 +171,7 @@ export const translations = {
     landingH1a:      "The perfect",
     landingH1b:      "SaaS stack",
     landingH1c:      "for your team in 3 minutes",
+    landingDefinition: "Goleu AI is a free tool that recommends the best SaaS stack for your team based on team roles, budget, and current tools.",
     landingSubtitle: "Tell us your team structure, budget, and current tools — Goleu picks the best SaaS combination for collaboration, dev, design, and AI.",
     stat1Val:   "50+", stat1Label: "SaaS tools reviewed",
     stat2Val:   "3min", stat2Label: "avg. completion time",
@@ -184,6 +201,21 @@ export const translations = {
     cookieBody:    "Goleu AI collects anonymized usage data (page visits, clicks, quiz responses) to improve our service. No personally identifiable information is collected.",
     cookieAccept:  "Accept & continue",
     cookieDecline: "Decline",
+
+    // ── FAQ (landing; same data as the JSON-LD FAQPage) ──────────────────
+    faqTitle: "Frequently asked questions",
+    faq1Q: "Is Goleu AI free?",
+    faq1A: "Yes. Goleu AI is completely free to use.",
+    faq2Q: "Do I need to sign up?",
+    faq2A: "No. You can start right away without an account. Your inputs and your latest recommendation are stored in your browser, so you can revisit them on My Page from the same device.",
+    faq3Q: "How long does it take?",
+    faq3A: "About 3 minutes on average. You answer four short steps: your team, the tools you already use, cloud & infrastructure, and AI services.",
+    faq4Q: "What information do I need to provide?",
+    faq4A: "Headcount per role, the tools you already use, your cloud platforms, hosting model, and monthly infrastructure budget, plus your AI use cases, expected usage, monthly AI budget, and AI platforms. A team name is optional, and no personal information such as your name, email, or phone number is required.",
+    faq5Q: "Can I save or share my results?",
+    faq5A: "Yes. \"Save my results\" creates a share link that stays valid for 30 days, and you can also save the page as a PDF. On My Page you can download your results as an HTML report or a JSON file.",
+    faq6Q: "Who is Goleu AI for?",
+    faq6A: "Teams choosing tools for collaboration, development, design, and AI. Goleu recommends a SaaS combination based on your mix of product, engineering, design, data, marketing, sales, customer support, and operations roles and your budget.",
 
     // ── Step 1 ────────────────────────────────────────────────────────────
     s1Title:        "Tell us about your team",

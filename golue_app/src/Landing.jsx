@@ -4,6 +4,10 @@ import { trackEvent, Events } from "./lib/analytics";
 import { MaterialIcon } from "./components/MaterialIcon";
 import { useLanguage } from "./lib/LanguageContext";
 import LangToggle from "./components/LangToggle";
+import Seo from "./components/Seo";
+import { FAQ_IDS, buildLandingJsonLd } from "./lib/seo";
+
+const LANDING_JSON_LD = buildLandingJsonLd();
 
 function ThemeToggle({ dark, onToggle }) {
   return (
@@ -199,6 +203,13 @@ export default function Landing() {
 
   return (
     <div style={{ background: "var(--bg-base)", color: "var(--text-primary)", fontFamily: "var(--font-sans)" }}>
+      <Seo
+        title="Goleu AI — Find the perfect SaaS stack for your team"
+        description={`${LANDING_JSON_LD[0].description} No sign-up required.`}
+        path="/"
+        lang={lang}
+        jsonLd={LANDING_JSON_LD}
+      />
 
       <header style={{
         position: "sticky", top: 0, zIndex: 100,
@@ -347,6 +358,9 @@ export default function Landing() {
         <div style={{ ...s.inner, textAlign: "center" }}>
           <span style={s.sectionLabel}>HOW IT WORKS</span>
           <h2 style={{ ...s.h2, textAlign: "center" }}>{t("howTitle")}</h2>
+          <p style={{ ...s.bodyText, textAlign: "center", maxWidth: 640, margin: "0 auto 48px" }}>
+            {t("landingDefinition")}
+          </p>
 
           <div className="r-grid-3 r-grid-3--steps">
             {HOW_IT_WORKS.map((item) => (
@@ -445,6 +459,40 @@ export default function Landing() {
             <span style={{ fontSize: 13, color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
               {t("sampleNote")}
             </span>
+          </div>
+        </div>
+      </section>
+
+      <div className="r-divider-wrap">
+        <div style={{ height: 1, background: "var(--border-subtle)" }} />
+      </div>
+
+      <section className="r-section" id="faq">
+        <div style={{ maxWidth: 880, margin: "0 auto" }}>
+          <span style={s.sectionLabel}>FAQ</span>
+          <h2 style={s.h2}>{t("faqTitle")}</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 32 }}>
+            {FAQ_IDS.map((n) => (
+              <details
+                key={n}
+                onToggle={(e) => {
+                  if (e.currentTarget.open) trackEvent(Events.FAQ_OPENED, { question_index: n });
+                }}
+                style={{
+                  background: "var(--bg-surface)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "var(--radius-card)",
+                  padding: "20px 24px",
+                }}
+              >
+                <summary style={{ cursor: "pointer", fontWeight: 700, fontSize: 17, color: "var(--text-primary)" }}>
+                  <h3 style={{ display: "inline", fontSize: "inherit", fontWeight: "inherit", margin: 0 }}>
+                    {t(`faq${n}Q`)}
+                  </h3>
+                </summary>
+                <p style={{ ...s.bodyText, fontSize: 15, marginTop: 12 }}>{t(`faq${n}A`)}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
