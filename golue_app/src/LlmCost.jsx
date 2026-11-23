@@ -1,8 +1,8 @@
-// LLM API 월 비용 계산기 (/llm-cost): 요청 수 × 토큰 → 모델별 월 비용. 가격은 worker/ai-stack.js 한 곳에서 가져온다.
+// LLM API 월 비용 계산기 (/llm-cost): 요청 수 × 토큰 → 모델별 월 비용. 가격은 src/lib/ai-stack.js 한 곳에서 가져온다.
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { InputNumber, Segmented, Table, Tag } from "antd";
-import { PRICES, USE_CASES, effectivePrice } from "../../worker/ai-stack.js";
+import { PRICES, USE_CASES, effectivePrice } from "./lib/ai-stack.js";
 import { useLanguage } from "./lib/LanguageContext";
 import { trackEvent } from "./lib/analytics";
 
