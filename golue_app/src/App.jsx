@@ -1,21 +1,6 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import { StrictMode, useEffect, useState } from "react";
 import { ConfigProvider } from "antd";
-import Landing from "./Landing";
-import GoleuMain from "./GoleuMain";
-import ToolSelect from "./ToolSelect";
-import GoleuResult from "./GoleuResult";
-import SavedResult from "./SavedResult";
-import CloudSelect from "./CloudSelect";
-import LLMSelect from "./LLMSelect";
-import MyPage from "./MyPage";
-import PrivacyPolicy from "./PrivacyPolicy";
-import TermsOfService from "./TermsOfService";
 import CookieConsent from "./components/CookieConsent";
 import { trackPageView } from "./lib/analytics";
 import { LanguageProvider } from "./lib/LanguageContext";
@@ -29,6 +14,7 @@ function RouteTracker() {
   return null;
 }
 
+/** 루트 레이아웃: 공통 상태·Provider·RouteTracker·CookieConsent */
 function App() {
   const [teamName, setTeamName] = useState("");
   const [roles, setRoles] = useState({
@@ -107,80 +93,30 @@ function App() {
     },
   };
 
+  // 퀴즈 흐름 상태 → 각 페이지에 useOutletContext 로 전달 (routes.jsx)
+  const quiz = {
+    teamName, setTeamName,
+    roles, setRoles,
+    selectedTools, setSelectedTools,
+    selectedClouds, setSelectedClouds,
+    selectedLLMs, setSelectedLLMs,
+    hostingType, setHostingType,
+    useCases, setUseCases,
+    monthlyBudget, setMonthlyBudget,
+    monthlyAIBudget, setMonthlyAIBudget,
+    expectedUsage, setExpectedUsage,
+  };
+
   return (
+    <StrictMode>
     <LanguageProvider>
     <ConfigProvider theme={theme}>
-    <Router>
       <RouteTracker />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/quiz" element={
-          <GoleuMain
-            teamName={teamName}
-            setTeamName={setTeamName}
-            roles={roles}
-            setRoles={setRoles}
-          />
-        } />
-        <Route path="/tools" element={
-          <ToolSelect
-            selectedTools={selectedTools}
-            setSelectedTools={setSelectedTools}
-            roles={roles}
-          />
-        } />
-        <Route path="/cloud" element={
-          <CloudSelect
-            selectedClouds={selectedClouds}
-            setSelectedClouds={setSelectedClouds}
-            hostingType={hostingType}
-            setHostingType={setHostingType}
-            monthlyBudget={monthlyBudget}
-            setMonthlyBudget={setMonthlyBudget}
-            teamName={teamName}
-            roles={roles}
-            selectedTools={selectedTools}
-          />
-        } />
-        <Route path="/llm" element={
-          <LLMSelect
-            selectedLLMs={selectedLLMs}
-            setSelectedLLMs={setSelectedLLMs}
-            useCases={useCases}
-            setUseCases={setUseCases}
-            monthlyAIBudget={monthlyAIBudget}
-            setMonthlyAIBudget={setMonthlyAIBudget}
-            expectedUsage={expectedUsage}
-            setExpectedUsage={setExpectedUsage}
-            teamName={teamName}
-            roles={roles}
-            selectedTools={selectedTools}
-            selectedClouds={selectedClouds}
-          />
-        } />
-        <Route path="/recommend" element={
-          <GoleuResult
-            teamName={teamName}
-            roles={roles}
-            selectedTools={selectedTools}
-            selectedClouds={selectedClouds}
-            hostingType={hostingType}
-            monthlyBudget={monthlyBudget}
-            selectedLLMs={selectedLLMs}
-            useCases={useCases}
-            monthlyAIBudget={monthlyAIBudget}
-            expectedUsage={expectedUsage}
-          />
-        } />
-        <Route path="/result/:id" element={<SavedResult />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsOfService />} />
-      </Routes>
+      <Outlet context={quiz} />
       <CookieConsent />
-    </Router>
     </ConfigProvider>
     </LanguageProvider>
+    </StrictMode>
   );
 }
 

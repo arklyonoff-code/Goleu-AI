@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { translations } from "./i18n";
 
 const LanguageContext = createContext({
@@ -8,13 +8,18 @@ const LanguageContext = createContext({
 });
 
 export function LanguageProvider({ children }) {
-  const [lang, setLangState] = useState(() => {
+  // 서버(SSG)와 첫 클라이언트 렌더는 항상 "en" → hydration 일치.
+  // 마운트 후 저장된 언어로 전환.
+  const [lang, setLangState] = useState("en");
+
+  useEffect(() => {
     try {
-      return localStorage.getItem("goleu_lang") || "en";
+      const saved = localStorage.getItem("goleu_lang");
+      if (saved && saved !== "en") setLangState(saved);
     } catch {
-      return "en";
+      /* ignore */
     }
-  });
+  }, []);
 
   const setLang = (newLang) => {
     setLangState(newLang);

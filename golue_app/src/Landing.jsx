@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { trackEvent, Events } from "./lib/analytics";
 import { MaterialIcon } from "./components/MaterialIcon";
@@ -99,17 +99,24 @@ function ToolCard({ tool, lang }) {
 export default function Landing() {
   const navigate = useNavigate();
   const { lang, t } = useLanguage();
-  const [dark, setDark] = useState(() => {
+  // SSG/첫 렌더는 라이트 고정, 마운트 후 저장된 테마 반영 (hydration 일치)
+  const [dark, setDark] = useState(false);
+  const themeLoaded = useRef(false);
+
+  useEffect(() => {
     try {
-      const saved = localStorage.getItem("goleu_theme");
-      if (saved !== null) return saved === "dark";
+      if (localStorage.getItem("goleu_theme") === "dark") setDark(true);
     } catch {
       /* ignore */
     }
-    return false;
-  });
+  }, []);
 
   useEffect(() => {
+    // 첫 실행에서는 저장값을 덮어쓰지 않음 (App.jsx가 data-theme 복원)
+    if (!themeLoaded.current) {
+      themeLoaded.current = true;
+      return;
+    }
     document.documentElement.dataset.theme = dark ? "dark" : "light";
     try {
       localStorage.setItem("goleu_theme", dark ? "dark" : "light");
