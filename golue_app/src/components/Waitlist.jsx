@@ -1,6 +1,7 @@
 // 출시 알림 대기자 등록 (유료 기능 수요 테스트). Worker /waitlist 로 이메일을 보낸다.
 import { useState } from "react";
 import { Alert, Button, Checkbox, Input } from "antd";
+import { Link } from "react-router-dom";
 import { useLanguage } from "../lib/LanguageContext";
 import { trackEvent } from "../lib/analytics";
 
@@ -19,7 +20,8 @@ const T = {
     priceAlert: "가격 변동 알림 (준비 중이에요. 시작하면 첫 메일로 알려드려요)",
     teamReport: "팀용 비용 · 데이터 위치 리포트에도 관심 있어요 (출시 예정)",
     placeholder: "you@example.com",
-    consent: "알림 발송에만 이메일을 사용하는 데 동의해요. 수집 항목: 이메일 · 보관: 알림 서비스 종료 또는 삭제 요청 시까지",
+    consent: "알림 발송에만 이메일을 사용하는 데 동의해요. 수집 항목: 이메일 · 보관: 알림 서비스 종료 또는 삭제 요청 시까지 · 보관 위치: Cloudflare(미국)",
+    policy: "개인정보처리방침",
     submit: "알림 받기",
     done: "등록됐어요. 알림을 시작하면 이 이메일로 먼저 알려드릴게요.",
     invalid: "이메일 주소를 확인해 주세요.",
@@ -33,7 +35,8 @@ const T = {
     priceAlert: "Price change alerts (coming soon; your first email will be the launch)",
     teamReport: "I'm also interested in a team cost & data-residency report (planned)",
     placeholder: "you@example.com",
-    consent: "I agree to my email being used only for these alerts. Collected: email · Kept until the alerts end or I ask for deletion",
+    consent: "I agree to my email being used only for these alerts. Collected: email · Kept until the alerts end or I ask for deletion · Stored with Cloudflare (US)",
+    policy: "Privacy policy (Korean)",
     submit: "Notify me",
     done: "You're on the list. We'll email you first when alerts go live.",
     invalid: "Please check your email address.",
@@ -89,7 +92,7 @@ export default function Waitlist({ from }) {
             <Input type="email" style={{ flex: "1 1 220px" }} placeholder={t.placeholder} value={email} onChange={(e) => setEmail(e.target.value)} onPressEnter={submit} />
             <Button type="primary" loading={state.status === "loading"} onClick={submit}>{t.submit}</Button>
           </div>
-          <Checkbox style={{ marginTop: 10, fontSize: 12, color: "#666" }} checked={consent} onChange={(e) => setConsent(e.target.checked)}>{t.consent}</Checkbox>
+          <Checkbox style={{ marginTop: 10, fontSize: 12, color: "#666" }} checked={consent} onChange={(e) => setConsent(e.target.checked)}>{t.consent} · <Link to="/privacy" target="_blank">{t.policy}</Link></Checkbox>
           {state.status === "error" && <Alert style={{ marginTop: 10 }} type="error" showIcon message={state.msg} />}
         </>
       )}
