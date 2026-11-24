@@ -14,6 +14,11 @@
  * 가격은 PRICES 한 곳에만 둔다. 갱신할 때는 asOf 와 sources 를 함께 바꾼다.
  */
 
+// 제휴(추천) 코드. Railway 대시보드 → Referrals 에서 받은 코드를 넣는다. 비어 있으면 일반 링크(제휴 아님)
+// 제휴 여부는 추천 순서에 영향을 주지 않는다 (결과 화면에 제휴 링크 안내 문구 표시)
+export const REFERRAL = { railway: "c-3B0U" };
+const railwayLink = REFERRAL.railway ? `https://railway.com?referralCode=${encodeURIComponent(REFERRAL.railway)}` : null;
+
 export const PRICES = {
   asOf: "2026-11-23",
   sources: {
@@ -66,7 +71,7 @@ export const PRICES = {
     free: { name: "Cloudflare Workers (Free)", monthly: 0, includedRequests: 3_000_000, note: { ko: "하루 10만 요청 한도", en: "100K requests/day limit" }, src: "cloudflare" },
     paid: { name: "Cloudflare Workers (Paid)", monthly: 5, includedRequests: 10_000_000, overPerMillion: 0.30, note: { ko: "월 1,000만 요청 포함", en: "10M requests/month included" }, src: "cloudflare" },
     // Railway Hobby: 월 $5(사용량 $5 포함), 서비스 사용량 vCPU $20/월, 메모리 $10/GB·월
-    railway: { name: "Railway (Hobby)", minimum: 5, perVcpu: 20, perGbRam: 10, src: "railway", affiliate: null },
+    railway: { name: "Railway (Hobby)", minimum: 5, perVcpu: 20, perGbRam: 10, src: "railway", affiliate: railwayLink },
   },
 };
 

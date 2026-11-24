@@ -1066,6 +1066,35 @@ async function handleDetail(request, env, ctx, origin) {
   return jsonResponse(detail, 200, origin, { "X-Cache": "MISS" });
 }
 
+// ─── 출시 알림 대기자 (/waitlist) ───────────────────────────────────────────
+// 유료 기능 수요 테스트용. 이메일 1개당 KV 키 1개(waitlist:<email>), 같은 이메일은 덮어쓴다.
+// 조회: wrangler kv key list --binding GOLEU_KV --prefix waitlist: --remote
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
+const WAITLIST_INTERESTS = new Set(["price_alert", "team_report"]);
+async function handleWaitlist(request, env, origin) {
+  if (!env.GOLEU_KV) return jsonResponse({ error: "unavailable" }, 503, origin);
+  let body;
+  try { body = await request.json(); } catch { return jsonResponse({ error: "bad_json" }, 400, origin); }
+  const email = String(body.email || "").trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) return jsonResponse({ error: "invalid_email" }, 400, origin);
+  if (body.consent !== true) return jsonResponse({ error: "consent_required" }, 400, origin);
+  const interests = (Array.isArray(body.interests) ? body.interests : []).filter((i) => WAITLIST_INTERESTS.has(i));
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const rlKey = `rl:waitlist:${ip}:${new Date().toISOString().slice(0, 10)}`;
+  const count = parseInt((await env.GOLEU_KV.get(rlKey)) || "0", 10);
+  if (count >= 10) return jsonResponse({ error: "rate_limited" }, 429, origin);
+  await Promise.all([
+    env.GOLEU_KV.put(`waitlist:${email}`, JSON.stringify({
+      createdAt: new Date().toISOString(),
+      interests,
+      lang: body.lang === "en" ? "en" : "ko",
+      from: String(body.from || "").slice(0, 40),
+    })),
+    env.GOLEU_KV.put(rlKey, String(count + 1), { expirationTtl: 86400 }),
+  ]);
+  return jsonResponse({ ok: true }, 200, origin);
+}
+
 // ─── 메인 핸들러 ─────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env, ctx) {
@@ -1099,6 +1128,10 @@ export default {
       let body = {};
       try { body = await request.json(); } catch { return jsonResponse({ error: "bad_json" }, 400, origin); }
       return jsonResponse(recommendAiStack(body), 200, origin);
+    }
+
+    if (path === "/waitlist" && request.method === "POST") {
+      return await handleWaitlist(request, env, origin);
     }
 
     return jsonResponse({ error: "Not found" }, 404, origin);

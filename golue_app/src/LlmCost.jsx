@@ -5,6 +5,7 @@ import { Button, Collapse, InputNumber, Segmented, Slider, Table, Tag } from "an
 import { PRICES, USE_CASES, effectivePrice, inputRate, priceForPrompt } from "./lib/ai-stack.js";
 import { useLanguage } from "./lib/LanguageContext";
 import { trackEvent } from "./lib/analytics";
+import Waitlist from "./components/Waitlist";
 
 const T = {
   ko: {
@@ -318,6 +319,8 @@ export default function LlmCost() {
       <p style={{ fontSize: 12, color: "#888", marginTop: 12 }}>{t.note(PRICES.asOf)}</p>
       <p style={{ fontSize: 12, color: "#888" }}>{t.tierNote}</p>
       <p style={{ fontSize: 12, color: "#888" }}>{t.hostNote}</p>
+
+      <Waitlist from="llm-cost" />
 
       <div style={{ marginTop: 32, padding: 24, borderRadius: 12, background: "#f5f3ff" }}>
         <div style={{ fontWeight: 700, fontSize: 18 }}>{t.ctaTitle}</div>
