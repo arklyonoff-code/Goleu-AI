@@ -149,7 +149,7 @@ function downloadHTML(session) {
 </head>
 <body>
   <h1>🔧 Goleu AI 스펙 리포트</h1>
-  <div class="meta">생성일: ${savedAt ? new Date(savedAt).toLocaleString("ko-KR") : ""} &nbsp;|&nbsp; goleu.ai</div>
+  <div class="meta">생성일: ${savedAt ? new Date(savedAt).toLocaleString("ko-KR") : ""} &nbsp;|&nbsp; goleu.vercel.app</div>
 
   <h2>📋 팀 정보</h2>
   <ul>
@@ -172,7 +172,7 @@ function downloadHTML(session) {
   <h2>✨ 이 팀을 위한 팁</h2>
   <div class="tip">${recommendation.tip}</div>` : ""}
 
-  <div class="footer">Goleu AI — AI 에이전트 빌더를 위한 도구 추천 | goleu.ai</div>
+  <div class="footer">Goleu AI — AI 에이전트 빌더를 위한 도구 추천 | goleu.vercel.app</div>
 </body>
 </html>`;
 

@@ -8,7 +8,7 @@ import { useLanguage } from "./lib/LanguageContext";
 const { Content } = Layout;
 
 const SERVICE_NAME = "Goleu AI";
-const CONTACT_EMAIL = "privacy@goleu.ai";
+const CONTACT_EMAIL = "arkly.onoff+privacy@gmail.com";
 const LINK = { color: "#6366f1" };
 const ext = (href, label) => <a href={href} target="_blank" rel="noopener noreferrer" style={LINK}>{label}</a>;
 
