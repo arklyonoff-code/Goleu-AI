@@ -54,7 +54,7 @@ export const PRICES = {
     { id: "glm-5.3@zai", name: "GLM-5.3", vendor: "Z.ai", host: { ko: "공식 API", en: "official API" }, region: "cn", tier: "balanced", input: 1.40, output: 4.40, cacheRead: 0.26, src: "zai", recommend: false, affiliate: null },
     { id: "glm-5.3@together", name: "GLM-5.3", vendor: "Together AI", host: { ko: "미국 호스팅", en: "US-hosted" }, region: "us", tier: "balanced", input: 1.40, output: 4.40, cacheRead: 0.26, src: "together", recommend: false, affiliate: null },
     // Qwen4 Max 는 오픈 웨이트가 아니라 외부 호스팅이 없다. Alibaba 공식 미국(버지니아) 리전이 국제 리전과 같은 가격
-    { id: "qwen4-max@alibaba-us", name: "Qwen4 Max", vendor: "Alibaba Cloud", host: { ko: "공식 API · 미국(버지니아) 리전, 국제 리전과 같은 가격", en: "official API · US (Virginia) region, same price as international" }, region: "us", tier: "balanced", input: 1.50, output: 4.50, cacheRead: 0.075, cacheWrite: 1.875, src: "alibaba", recommend: false, affiliate: null },
+    { id: "qwen4-max@alibaba-us", name: "Qwen4 Max", vendor: "Alibaba Cloud", usRegionOfficial: true, host: { ko: "공식 API · 미국(버지니아) 리전, 국제 리전과 같은 가격", en: "official API · US (Virginia) region, same price as international" }, region: "us", tier: "balanced", input: 1.50, output: 4.50, cacheRead: 0.075, cacheWrite: 1.875, src: "alibaba", recommend: false, affiliate: null },
   ],
   vectorDbs: {
     supabaseFree: { name: "Supabase pgvector (Free)", monthly: 0, note: { ko: "DB 500MB, 7일 미사용 시 일시정지", en: "500MB DB, pauses after 7 idle days" }, src: "supabase", affiliate: null },
@@ -75,11 +75,15 @@ export const PRICES = {
 export const USE_CASES = {
   chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
   rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, cache: { prefix: 0.3, expiry: 0.5 }, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" } },
-  agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, cache: { prefix: 0.8, expiry: 0.1 }, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
+  agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, cache: { prefix: 0.8, expiry: 0.1 },
+              // turns: 작업 단위 계산 도우미 기본값(가정). 평균 입력 = 시작 컨텍스트 + 턴당 증가 × (턴 수 − 1) / 2 ≈ 12k
+              turns: { tasksPerDay: 100, perTask: 10, base: 8000, growth: 900 }, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
   // 계산기 전용(calcOnly): 오래 돌아가는 코딩 에이전트. 매 턴 커진 컨텍스트를 다시 보내고 출력은 대부분 짧은 도구 호출.
   // 기본값은 Reddit 사용자 1명의 Claude Code 세션 1건 실측(요청 233건, 입력 중앙값 ~148k, 출력 ~500, 입력의 91% 캐시 읽기·9% 캐시 쓰기).
   // /build 로 넘길 때는 agent 로 취급(buildAs)
   coding:   { label: { ko: "코딩 에이전트(긴 세션)", en: "Coding agent (long session)" }, inTok: 148000, outTok: 500, reqPerUser: 10, cache: { prefix: 1, expiry: 0.09 }, calcOnly: true, buildAs: "agent",
+              // 세션당 233턴, 평균 입력 ≈ 20k + 1,100 × 116 ≈ 148k 가 되도록 맞춘 가정값
+              turns: { tasksPerDay: 4, perTask: 233, base: 20000, growth: 1100 },
               source: { ko: "기본값 출처: Reddit 사용자의 Claude Code 긴 세션 1건 실측 (요청 233건, 입력 중앙값 약 148k · 출력 약 500 토큰, 입력의 91% 캐시 읽기 · 9% 캐시 쓰기). 모든 코딩 에이전트의 평균이 아닙니다.", en: "Defaults from one measured Claude Code session shared by a Reddit user (233 requests, median ~148k input / ~500 output tokens, 91% cache reads / 9% cache writes). Not an average for every coding agent." } },
   extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "Official SDK + Pydantic structured output", typescript: "Vercel AI SDK (generateObject)" } },
   generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
