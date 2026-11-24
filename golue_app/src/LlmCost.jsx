@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, InputNumber, Segmented, Slider, Table, Tag } from "antd";
-import { PRICES, USE_CASES, effectivePrice, inputRate } from "./lib/ai-stack.js";
+import { PRICES, USE_CASES, effectivePrice, inputRate, priceForPrompt } from "./lib/ai-stack.js";
 import { useLanguage } from "./lib/LanguageContext";
 import { trackEvent } from "./lib/analytics";
 
@@ -19,7 +19,8 @@ const T = {
     verdict: (c, b, p) => `이 조건에서 가장 싼 선택은 ${c}예요. 균형 등급 최저가는 ${b}, 고가 등급 최저가는 ${p}예요.`,
     perMonth: (v) => `월 ${v}`, offPeak: "비혼잡 시간",
     toBuild: "이 조건으로 전체 스택 보기 →", copy: "이 조건 링크 복사", copied: "복사했어요",
-    cacheTitle: "프롬프트 캐싱", prefix: "입력 중 매번 반복되는 앞부분 (시스템 프롬프트·이전 대화)", expiry: "캐시가 만료돼 다시 쓰는 비율 (요청 간격이 캐시 유지 시간보다 길 때)",
+    cacheTitle: "프롬프트 캐싱", prefix: "입력 중 매번 반복되는 앞부분 (시스템 프롬프트·이전 대화)", expiry: "그중 캐시에 새로 쓰는 비율 (새로 붙은 대화 · 만료돼 다시 쓰는 부분)",
+    longCtx: "입력 10만 토큰 초과: Claude Haiku 5.5는 장문 요금으로 계산했습니다. 다른 모델의 장문 구간 요금(예: GPT-6.1 Terra 27.2만 토큰 초과)은 아직 반영하지 않았습니다.", longTag: "장문 요금",
     cacheNote: "기본값은 이 용도의 가정입니다. 캐시 쓰기는 Anthropic만 입력가의 1.25배, OpenAI·Google은 입력가로 계산합니다.", cached: "캐시",
     spread: (x) => `지금 조건에서 가장 비싼 모델은 가장 싼 모델의 ${x}배`,
     note: (d) => `가격 기준일 ${d} · 각 사의 공식 가격 페이지 기준 표준 요금 · Gemini 캐시 저장료·배치 할인 미반영 · 한 달은 30일로 계산`,
@@ -40,7 +41,8 @@ const T = {
     verdict: (c, b, p) => `Cheapest at these settings: ${c}. Cheapest balanced-tier: ${b}. Cheapest premium-tier: ${p}.`,
     perMonth: (v) => `${v}/mo`, offPeak: "off-peak",
     toBuild: "See the full stack for these settings →", copy: "Copy link to these settings", copied: "Copied",
-    cacheTitle: "Prompt caching", prefix: "Share of input repeated every request (system prompt, prior turns)", expiry: "Share re-written after cache expiry (gap between requests > cache lifetime)",
+    cacheTitle: "Prompt caching", prefix: "Share of input repeated every request (system prompt, prior turns)", expiry: "Share of that written to cache (newly appended turns, or re-written after expiry)",
+    longCtx: "Over 100K input tokens: Claude Haiku 5.5 is priced at its long-context rate. Long-context tiers for other models (e.g. GPT-6.1 Terra above 272K) are not applied yet.", longTag: "long-context rate",
     cacheNote: "Defaults are assumptions for this use case. Cache writes: Anthropic at 1.25x input, OpenAI and Google at the input price.", cached: "cached",
     spread: (x) => `At these settings the most expensive model costs ${x}x the cheapest`,
     note: (d) => `Prices as of ${d} · official standard list prices · Gemini cache storage and batch discounts not included · 30-day month`,
@@ -118,8 +120,8 @@ export default function LlmCost() {
   }, [urlReady, preset, perDay, inTok, outTok, cacheOn, prefix, expiry, hostScope]);
 
   const buildHref = `/build?${new URLSearchParams({
-    desc: BUILD_DESC[preset][ko ? "ko" : "en"],
-    mau: nearestMau(((perDay || 0) * 30) / USE_CASES[preset].reqPerUser),
+    desc: BUILD_DESC[USE_CASES[preset].buildAs || preset][ko ? "ko" : "en"],
+    mau: nearestMau(((perDay || 0) * 30) / USE_CASES[USE_CASES[preset].buildAs || preset].reqPerUser),
     from: "llm-cost",
   })}`;
 
@@ -145,7 +147,7 @@ export default function LlmCost() {
     const monthlyReq = (perDay || 0) * 30;
     return PRICES.llms
       .filter((m) => hostScope === "all" || (m.region || "us") === "us")
-      .map((m) => effectivePrice(m))
+      .map((m) => priceForPrompt(effectivePrice(m), inTok || 0))
       .map((m) => ({
         key: m.id,
         name: m.name,
@@ -156,6 +158,7 @@ export default function LlmCost() {
         price: `$${m.input} / $${m.output}`,
         cacheRead: m.cacheRead,
         offPeak: Boolean(m.offPeak),
+        longContext: Boolean(m.longContext),
         note: m.note,
         monthly: (monthlyReq * (inTok || 0) / 1e6) * (cacheOn ? inputRate(m, prefix / 100, expiry / 100) : m.input) + (monthlyReq * (outTok || 0) / 1e6) * m.output,
       }))
@@ -174,7 +177,7 @@ export default function LlmCost() {
     : null;
 
   const columns = [
-    { title: t.model, dataIndex: "name", render: (v, r) => <div><b>{v}</b><div style={{ fontSize: 12, color: "#888" }}>{r.vendor}{r.host ? ` · ${noteText(r.host, ko)}` : ""}{r.note ? ` · ${noteText(r.note, ko)}` : ""}</div></div> },
+    { title: t.model, dataIndex: "name", render: (v, r) => <div><b>{v}</b><div style={{ fontSize: 12, color: "#888" }}>{r.vendor}{r.host ? ` · ${noteText(r.host, ko)}` : ""}{r.longContext ? ` · ${t.longTag}` : r.note ? ` · ${noteText(r.note, ko)}` : ""}</div></div> },
     { title: t.tier, dataIndex: "tier", render: (v) => <Tag color={TIER_COLOR[v]}>{t.tiers[v]}</Tag> },
     { title: t.price, dataIndex: "price", responsive: ["sm"], render: (v, r) => <div>{v}{r.cacheRead != null && <div style={{ fontSize: 12, color: "#888" }}>{t.cached} ${r.cacheRead}</div>}</div> },
     { title: t.monthly, dataIndex: "monthly", align: "right", render: (v) => <b>{usd(v)}</b> },
@@ -188,8 +191,11 @@ export default function LlmCost() {
       <p style={{ color: "#666", marginBottom: 24 }}>{t.sub}</p>
 
       <div style={field}>{t.preset}</div>
-      <Segmented block value={preset} onChange={applyPreset}
-        options={Object.entries(USE_CASES).map(([k, v]) => ({ label: v.label[ko ? "ko" : "en"], value: k }))} />
+      <div style={{ overflowX: "auto" }}>
+        <Segmented value={preset} onChange={applyPreset}
+          options={Object.entries(USE_CASES).map(([k, v]) => ({ label: v.label[ko ? "ko" : "en"], value: k }))} />
+      </div>
+      {USE_CASES[preset].source && <p style={{ fontSize: 12, color: "#888", marginTop: 6 }}>{noteText(USE_CASES[preset].source, ko)}</p>}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginTop: 16 }}>
         <div><div style={field}>{t.perDay}</div><InputNumber style={{ width: "100%" }} min={0} step={100} value={perDay} onChange={setPerDay} /></div>
@@ -200,6 +206,8 @@ export default function LlmCost() {
       <div style={{ ...field, marginTop: 16 }}>{t.hostFilter}</div>
       <Segmented value={hostScope} onChange={(v) => { setHostScope(v); trackEvent("llm_cost_host", { scope: v }); }}
         options={[{ label: t.hostAll, value: "all" }, { label: t.hostUs, value: "us" }]} />
+
+      {(inTok || 0) > 100000 && <p style={{ fontSize: 12, color: "#b45309", marginTop: 8 }}>{t.longCtx}</p>}
 
       <p style={{ fontSize: 13, color: "#666", marginTop: 8 }}>{t.monthlyReq((perDay || 0) * 30, perDay || 0)}</p>
 

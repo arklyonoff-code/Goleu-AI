@@ -38,7 +38,7 @@ export const PRICES = {
   // recommend: false 인 모델은 계산기(/llm-cost)에만 나오고 스택 추천(/build) 후보에서는 빠진다.
   // gpt-6-luna 의 cacheRead 는 공식 페이지 Flex 표($0.005, Standard의 절반)에서 역산한 값.
   llms: [
-    { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, cacheRead: 0.01, cacheWrite: 0.125, note: { ko: "프롬프트 10만 토큰 이하 기준", en: "for prompts up to 100K tokens" }, src: "anthropic", affiliate: null },
+    { id: "claude-haiku-5.5", name: "Claude Haiku 5.5", vendor: "Anthropic", tier: "economy", input: 0.10, output: 0.50, cacheRead: 0.01, cacheWrite: 0.125, tiers: [{ over: 100000, input: 0.50, output: 2.50, cacheRead: 0.05, cacheWrite: 0.625 }], note: { ko: "프롬프트 10만 토큰 초과 시 $0.50 / $2.50", en: "$0.50 / $2.50 for prompts over 100K tokens" }, src: "anthropic", affiliate: null },
     { id: "gpt-6-luna", name: "GPT-6 Luna", vendor: "OpenAI", tier: "economy", input: 0.10, output: 0.50, cacheRead: 0.01, src: "openai", affiliate: null },
     { id: "gpt-6.1-terra", name: "GPT-6.1 Terra", vendor: "OpenAI", tier: "balanced", input: 1.00, output: 5.00, cacheRead: 0.05, src: "openai", affiliate: null },
     { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash", vendor: "Google", tier: "balanced", input: 0.75, output: 3.75, cacheRead: 0.075, until: "2026-12-31", after: { input: 1.50, output: 7.50, cacheRead: 0.15 }, note: { ko: "2026-12-31까지 할인가, 2027-01-01부터 $1.50 / $7.50", en: "promo price through 2026-12-31, then $1.50 / $7.50" }, src: "google", affiliate: null },
@@ -76,6 +76,11 @@ export const USE_CASES = {
   chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
   rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, cache: { prefix: 0.3, expiry: 0.5 }, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" } },
   agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, cache: { prefix: 0.8, expiry: 0.1 }, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
+  // 계산기 전용(calcOnly): 오래 돌아가는 코딩 에이전트. 매 턴 커진 컨텍스트를 다시 보내고 출력은 대부분 짧은 도구 호출.
+  // 기본값은 Reddit 사용자 1명의 Claude Code 세션 1건 실측(요청 233건, 입력 중앙값 ~148k, 출력 ~500, 입력의 91% 캐시 읽기·9% 캐시 쓰기).
+  // /build 로 넘길 때는 agent 로 취급(buildAs)
+  coding:   { label: { ko: "코딩 에이전트(긴 세션)", en: "Coding agent (long session)" }, inTok: 148000, outTok: 500, reqPerUser: 10, cache: { prefix: 1, expiry: 0.09 }, calcOnly: true, buildAs: "agent",
+              source: { ko: "기본값 출처: Reddit 사용자의 Claude Code 긴 세션 1건 실측 (요청 233건, 입력 중앙값 약 148k · 출력 약 500 토큰, 입력의 91% 캐시 읽기 · 9% 캐시 쓰기). 모든 코딩 에이전트의 평균이 아닙니다.", en: "Defaults from one measured Claude Code session shared by a Reddit user (233 requests, median ~148k input / ~500 output tokens, 91% cache reads / 9% cache writes). Not an average for every coding agent." } },
   extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "Official SDK + Pydantic structured output", typescript: "Vercel AI SDK (generateObject)" } },
   generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
 };
@@ -100,6 +105,12 @@ export function classify(description = "") {
 
 const round = (n) => Math.round(n * 100) / 100;
 
+// 요청 1건의 입력 토큰 수로 요금 구간을 고른다. 구간을 넘으면 그 요청 전체가 높은 단가로 계산된다(Anthropic 장문 요금 방식)
+export function priceForPrompt(model, inTok = 0) {
+  const tier = (model.tiers || []).filter((t) => inTok > t.over).sort((a, b) => b.over - a.over)[0];
+  return tier ? { ...model, ...tier, longContext: true } : model;
+}
+
 // 할인가 기간이 끝난 모델은 이후 가격으로 계산한다
 export function effectivePrice(model, today = new Date().toISOString().slice(0, 10)) {
   if (model.until && model.after && today > model.until) return { ...model, input: model.after.input, output: model.after.output, cacheRead: model.after.cacheRead ?? model.cacheRead, note: null };
@@ -116,7 +127,8 @@ export function inputRate(model, prefix = 0, expiry = 0) {
 }
 
 function llmCost(model, requests, uc) {
-  return round((requests * uc.inTok / 1e6) * model.input + (requests * uc.outTok / 1e6) * model.output);
+  const m = priceForPrompt(model, uc.inTok);
+  return round((requests * uc.inTok / 1e6) * m.input + (requests * uc.outTok / 1e6) * m.output);
 }
 
 function pickLlm(useCase, priority, today) {
