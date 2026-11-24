@@ -135,9 +135,9 @@ export function PrivacyRoute() {
     <>
       <Seo
         title="Privacy Policy — Goleu AI"
-        description="How Goleu AI handles data: anonymized usage analytics after consent, quiz inputs kept in your browser, and saved results stored for 30 days."
+        description="How Goleu AI handles data: anonymized analytics, calculator inputs that are never stored, optional launch-alert emails kept with Cloudflare (US), and your right to delete them. English and Korean."
         path="/privacy"
-        lang="ko"
+        lang="en"
       />
       <PrivacyPolicy />
     </>

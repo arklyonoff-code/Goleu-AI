@@ -36,7 +36,7 @@ const T = {
     teamReport: "I'm also interested in a team cost & data-residency report (planned)",
     placeholder: "you@example.com",
     consent: "I agree to my email being used only for these alerts. Collected: email · Kept until the alerts end or I ask for deletion · Stored with Cloudflare (US)",
-    policy: "Privacy policy (Korean)",
+    policy: "Privacy policy",
     submit: "Notify me",
     done: "You're on the list. We'll email you first when alerts go live.",
     invalid: "Please check your email address.",
