@@ -6,7 +6,7 @@ const { Content } = Layout;
 
 const LAST_UPDATED = "2026년 6월";
 const SERVICE_NAME = "Goleu AI";
-const CONTACT_EMAIL = "arkly.onoff+support@gmail.com";
+const CONTACT_EMAIL = "arkly.onoff@gmail.com";
 
 export default function TermsOfService() {
   const navigate = useNavigate();

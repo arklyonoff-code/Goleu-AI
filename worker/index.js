@@ -16,8 +16,6 @@ const SAVE_TTL_SEC = 60 * 60 * 24 * 30; // 30일
 
 // ─── CORS ───────────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = new Set([
-  "https://goleu.ai",
-  "https://www.goleu.ai",
   "https://goleuai.pages.dev",
   "http://localhost:5173",
   "http://localhost:4173",
