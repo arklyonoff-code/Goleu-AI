@@ -76,22 +76,31 @@ export const PRICES = {
 };
 
 // 용도별 요청 1건당 토큰과 사용자 1명의 월 요청 수 (가정. 결과 화면에 그대로 보여준다)
-// cache: 계산기(/llm-cost)의 캐싱 기본값(가정). 반복 앞부분이 큰 RAG·에이전트에만 둔다
+// calc: 계산기(/llm-cost) 기본값(가정). 작업(task) = turns 번의 요청.
+//   start   매 요청 맨 앞에 붙는 고정 컨텍스트(시스템 프롬프트·도구 정의). 캐시 대상
+//   perTurn 턴마다 새로 들어가는 입력(사용자 메시지·도구 결과·검색 문서)
+//   hit     이미 보낸 부분(start + 이전 턴)이 캐시에서 읽히는 비율. 못 읽힌 부분은 다시 쓴다
+//   out     턴당 출력 토큰
 export const USE_CASES = {
-  chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
-  rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, cache: { prefix: 0.3, expiry: 0.5 }, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" } },
-  agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, cache: { prefix: 0.8, expiry: 0.1 },
-              // turns: 작업 단위 계산 도우미 기본값(가정). 평균 입력 = 시작 컨텍스트 + 턴당 증가 × (턴 수 − 1) / 2 ≈ 12k
-              turns: { tasksPerDay: 100, perTask: 10, base: 8000, growth: 900 }, framework: { python: "LangGraph", typescript: "LangGraph.js" } },
+  chat:     { label: { ko: "챗봇·상담", en: "Chatbot / support" },        inTok: 1500,  outTok: 400,  reqPerUser: 20, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" },
+              // 시스템 프롬프트 1k 는 대부분 제공자의 최소 캐시 길이(약 1,024 토큰)에 못 미쳐 캐시 없음으로 둔다
+              calc: { tasksPerDay: 1000, turns: 1, start: 1000, perTurn: 500, hit: 0, out: 400 } },
+  rag:      { label: { ko: "문서 검색(RAG)", en: "Document Q&A (RAG)" },   inTok: 4000,  outTok: 500,  reqPerUser: 20, framework: { python: "LlamaIndex", typescript: "LlamaIndex.TS" },
+              // 고정 지시문 1.2k 는 캐시 대상, 검색된 문서 2.8k 는 매번 달라 정가
+              calc: { tasksPerDay: 1000, turns: 1, start: 1200, perTurn: 2800, hit: 0.5, out: 500 } },
+  agent:    { label: { ko: "업무 자동화 에이전트", en: "Task agent" },     inTok: 12000, outTok: 1500, reqPerUser: 10, framework: { python: "LangGraph", typescript: "LangGraph.js" },
+              // 작업 100건 × 10턴 = 하루 요청 1,000건. 평균 입력 ≈ 8k + 900 × 5.5 ≈ 13k (가정)
+              calc: { tasksPerDay: 100, turns: 10, start: 8000, perTurn: 900, hit: 0.9, out: 1500 } },
   // 계산기 전용(calcOnly): 오래 돌아가는 코딩 에이전트. 매 턴 커진 컨텍스트를 다시 보내고 출력은 대부분 짧은 도구 호출.
-  // 기본값은 Reddit 사용자 1명의 Claude Code 세션 1건 실측(요청 233건, 입력 중앙값 ~148k, 출력 ~500, 입력의 91% 캐시 읽기·9% 캐시 쓰기).
-  // /build 로 넘길 때는 agent 로 취급(buildAs)
-  coding:   { label: { ko: "코딩 에이전트(긴 세션)", en: "Coding agent (long session)" }, inTok: 148000, outTok: 500, reqPerUser: 10, cache: { prefix: 1, expiry: 0.09 }, calcOnly: true, buildAs: "agent",
-              // 세션당 233턴, 평균 입력 ≈ 20k + 1,100 × 116 ≈ 148k 가 되도록 맞춘 가정값
-              turns: { tasksPerDay: 4, perTask: 233, base: 20000, growth: 1100 },
-              source: { ko: "기본값 출처: Reddit 사용자의 Claude Code 긴 세션 1건 실측 (요청 233건, 입력 중앙값 약 148k · 출력 약 500 토큰, 입력의 91% 캐시 읽기 · 9% 캐시 쓰기). 모든 코딩 에이전트의 평균이 아닙니다.", en: "Defaults from one measured Claude Code session shared by a Reddit user (233 requests, median ~148k input / ~500 output tokens, 91% cache reads / 9% cache writes). Not an average for every coding agent." } },
-  extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "Official SDK + Pydantic structured output", typescript: "Vercel AI SDK (generateObject)" } },
-  generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" } },
+  // 기본값은 Reddit 사용자 1명의 Claude Code 세션 1건 실측(요청 233건, 입력 중앙값 ~148k, 출력 ~500, 입력의 91% 캐시 읽기·9% 캐시 쓰기)에 맞춘 값.
+  // 평균 입력 ≈ 20k + 1,100 × 117 ≈ 149k, 적중률 92% 일 때 입력의 약 91% 가 캐시 읽기가 된다. /build 로 넘길 때는 agent 로 취급(buildAs)
+  coding:   { label: { ko: "코딩 에이전트(긴 세션)", en: "Coding agent (long session)" }, inTok: 148000, outTok: 500, reqPerUser: 10, calcOnly: true, buildAs: "agent",
+              calc: { tasksPerDay: 4, turns: 233, start: 20000, perTurn: 1100, hit: 0.92, out: 500 },
+              source: { ko: "기본값 출처: Reddit 사용자의 Claude Code 긴 세션 1건 실측 (요청 233건, 입력 중앙값 약 148k · 출력 약 500 토큰, 입력의 91% 캐시 읽기 · 9% 캐시 쓰기). 모든 코딩 에이전트의 평균이 아닙니다.", en: "Defaults fitted to one measured Claude Code session shared by a Reddit user (233 requests, median ~148k input / ~500 output tokens, 91% cache reads / 9% cache writes). Not an average for every coding agent." } },
+  extract:  { label: { ko: "데이터 추출·분류", en: "Extraction / classification" }, inTok: 3000, outTok: 600, reqPerUser: 30, framework: { python: "Official SDK + Pydantic structured output", typescript: "Vercel AI SDK (generateObject)" },
+              calc: { tasksPerDay: 1000, turns: 1, start: 0, perTurn: 3000, hit: 0, out: 600 } },
+  generate: { label: { ko: "콘텐츠 생성", en: "Content generation" },      inTok: 800,   outTok: 1200, reqPerUser: 15, framework: { python: "FastAPI + official SDK", typescript: "Vercel AI SDK" },
+              calc: { tasksPerDay: 1000, turns: 1, start: 0, perTurn: 800, hit: 0, out: 1200 } },
 };
 
 const KEYWORDS = {
@@ -113,6 +122,43 @@ export function classify(description = "") {
 }
 
 const round = (n) => Math.round(n * 100) / 100;
+
+// 작업 1건의 비용. 턴 t 의 입력 = start + perTurn × (t − 1) [이미 보낸 부분] + perTurn [새 입력]
+//  - 이미 보낸 부분: hit 만큼 캐시 읽기 단가, 나머지는 캐시 쓰기 단가(만료·미적중으로 다시 씀)
+//  - 새 입력: 여러 턴 작업이면 다음 턴에 다시 쓰이므로 캐시 쓰기 단가, 1턴 작업이면 재사용이 없어 입력 단가
+//  - cacheRead 가 null 인 모델(캐시 없음)이나 적중률 0 이면 모든 입력을 입력 단가로 계산
+//  - cacheWrite 가 null 이면 쓰기 할증 없음(입력 단가)
+//  - 요금 구간(장문 요금)은 턴마다 그 턴의 입력 크기로 고른다
+export function taskCost(model, calc) {
+  const turns = Math.max(1, Math.round(calc.turns || 1));
+  const start = Math.max(0, calc.start || 0), perTurn = Math.max(0, calc.perTurn || 0), out = Math.max(0, calc.out || 0);
+  const hit = Math.min(1, Math.max(0, calc.hit || 0));
+  let input = 0, cacheRead = 0, cacheWrite = 0, output = 0, tokens = 0, maxInput = 0, longContext = false;
+  for (let t = 1; t <= turns; t++) {
+    const prior = start + perTurn * (t - 1);
+    const size = prior + perTurn;
+    const m = priceForPrompt(model, size);
+    if (m.longContext) longContext = true;
+    tokens += size; maxInput = Math.max(maxInput, size);
+    if (m.cacheRead == null || hit === 0) {
+      // 캐시를 지원하지 않거나 쓰지 않는 경우(적중률 0): 쓰기 할증 없이 전부 입력 단가
+      input += size * m.input;
+    } else {
+      const write = m.cacheWrite ?? m.input;
+      cacheRead += prior * hit * m.cacheRead;
+      cacheWrite += prior * (1 - hit) * write;
+      if (turns > 1) cacheWrite += perTurn * write; else input += perTurn * m.input;
+    }
+    output += out * m.output;
+  }
+  const d = 1e6;
+  const total = (input + cacheRead + cacheWrite + output) / d;
+  return {
+    total, input: input / d, cacheRead: cacheRead / d, cacheWrite: cacheWrite / d, output: output / d,
+    cacheShare: total > 0 ? (cacheRead + cacheWrite) / d / total : 0,
+    avgInput: tokens / turns, maxInput, longContext, requests: turns,
+  };
+}
 
 // 요청 1건의 입력 토큰 수로 요금 구간을 고른다. 구간을 넘으면 그 요청 전체가 높은 단가로 계산된다(Anthropic 장문 요금 방식)
 export function priceForPrompt(model, inTok = 0) {
