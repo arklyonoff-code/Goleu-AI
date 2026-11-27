@@ -122,8 +122,55 @@ export function initAnalytics() {
   initialized = true;
 }
 
+// --- 익명 집계 카운터 (쿠키·식별자 없음, 동의와 무관) ---
+// GA4 는 동의한 사람만 집계해 퍼널이 거의 비어 있다. 핵심 이벤트만 "날짜 × 이벤트 × 유입 채널" 횟수로 Worker 에 보낸다.
+// 개인을 구분하는 값(ID, IP, 쿠키)은 보내지 않는다. 같은 세션의 같은 이벤트는 한 번만 센다(KV 무료 쓰기 한도 보호).
+const COUNTER_EVENTS = new Set([
+  "visit", "llm_cost_preset", "llm_cost_advanced_open", "llm_cost_copy_link", "llm_cost_shared_open",
+  "funnel_to_goleu", "ai_stack_recommended", "affiliate_click", "waitlist_submit",
+]);
+const COUNTER_URL = (import.meta.env.VITE_WORKER_URL || "").trim().replace(/\/$/, "");
+
+function sessionGet(k) { try { return sessionStorage.getItem(k); } catch { return null; } }
+function sessionSet(k, v) { try { sessionStorage.setItem(k, v); } catch { /* ignore */ } }
+
+// 첫 진입 시 유입 채널을 정해 세션 동안 유지 (utm_source 우선, 없으면 referrer 도메인)
+function trafficSource() {
+  const saved = sessionGet("goleu_src");
+  if (saved) return saved;
+  let src = "direct";
+  try {
+    const utm = new URLSearchParams(window.location.search).get("utm_source");
+    const ref = document.referrer ? new URL(document.referrer).hostname : "";
+    const raw = (utm || ref || "").toLowerCase();
+    if (!raw || raw.endsWith(window.location.hostname)) src = utm ? utm.toLowerCase() : "direct";
+    else if (raw.includes("reddit")) src = "reddit";
+    else if (raw.includes("threads")) src = "threads";
+    else if (raw.includes("linkedin") || raw === "lnkd.in") src = "linkedin";
+    else if (raw.includes("google")) src = "google";
+    else if (raw.includes("chatgpt") || raw.includes("openai") || raw.includes("perplexity") || raw.includes("claude")) src = "ai_search";
+    else src = "other";
+  } catch { /* ignore */ }
+  sessionSet("goleu_src", src);
+  return src;
+}
+
+export function countEvent(name) {
+  if (typeof window === "undefined" || !COUNTER_URL || !COUNTER_EVENTS.has(name)) return;
+  if (import.meta.env.DEV) return;
+  const key = `goleu_ev_${name}`;
+  if (sessionGet(key)) return;
+  sessionSet(key, "1");
+  const body = JSON.stringify({ n: name, s: trafficSource() });
+  try {
+    if (navigator.sendBeacon) navigator.sendBeacon(`${COUNTER_URL}/e`, new Blob([body], { type: "text/plain" }));
+    else fetch(`${COUNTER_URL}/e`, { method: "POST", body, keepalive: true, headers: { "Content-Type": "text/plain" } });
+  } catch { /* 집계 실패는 무시 */ }
+}
+
 // --- 이벤트 발송 ---
 export function trackEvent(name, params = {}) {
+  countEvent(name);
   if (!hasConsent()) return;
   if (!initialized) initAnalytics();
   if (typeof window.gtag !== "function") return;

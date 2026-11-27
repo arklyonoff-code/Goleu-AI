@@ -3,13 +3,14 @@ import { StrictMode, useEffect, useState } from "react";
 import { ConfigProvider } from "antd";
 import CookieConsent from "./components/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
-import { trackPageView } from "./lib/analytics";
+import { countEvent, trackPageView } from "./lib/analytics";
 import { LanguageProvider } from "./lib/LanguageContext";
 
 /** 라우트 변경 시 GA4 page_view 전송 */
 function RouteTracker() {
   const location = useLocation();
   useEffect(() => {
+    countEvent("visit"); // 세션당 1회 (유입 채널별 방문 수)
     trackPageView(location.pathname);
   }, [location.pathname]);
   return null;

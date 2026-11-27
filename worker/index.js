@@ -1093,6 +1093,56 @@ async function handleWaitlist(request, env, origin) {
   return jsonResponse({ ok: true }, 200, origin);
 }
 
+// ─── 익명 이벤트 카운터 (/e, /stats) ────────────────────────────────────────
+// 키: ev:<YYYY-MM-DD>:<이벤트>:<유입 채널>  값: 횟수. 개인 식별 정보는 받지도 저장하지도 않는다.
+// KV 무료 플랜은 하루 쓰기 한도가 있어 프론트에서 세션당 이벤트 1회로 줄여 보낸다.
+const EVENT_NAMES = new Set([
+  "visit", "llm_cost_preset", "llm_cost_advanced_open", "llm_cost_copy_link", "llm_cost_shared_open",
+  "funnel_to_goleu", "ai_stack_recommended", "affiliate_click", "waitlist_submit",
+]);
+const EVENT_SOURCES = new Set(["direct", "reddit", "threads", "linkedin", "google", "ai_search", "other"]);
+const EVENT_TTL_SEC = 60 * 60 * 24 * 180; // 180일 보관
+
+async function handleEvent(request, env, origin) {
+  if (!env.GOLEU_KV) return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  let body = {};
+  try { body = JSON.parse(await request.text()); } catch { return new Response(null, { status: 204, headers: corsHeaders(origin) }); }
+  const name = String(body.n || "");
+  let src = String(body.s || "direct").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+  if (!EVENT_NAMES.has(name)) return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  if (!EVENT_SOURCES.has(src)) src = "other";
+  const key = `ev:${new Date().toISOString().slice(0, 10)}:${name}:${src}`;
+  const count = parseInt((await env.GOLEU_KV.get(key)) || "0", 10);
+  await env.GOLEU_KV.put(key, String(count + 1), { expirationTtl: EVENT_TTL_SEC });
+  return new Response(null, { status: 204, headers: corsHeaders(origin) });
+}
+
+// 조회: curl -H "Authorization: Bearer $STATS_TOKEN" https://<worker>/stats?days=14
+async function handleStats(request, env, origin) {
+  const auth = request.headers.get("Authorization") || "";
+  if (!env.STATS_TOKEN || auth !== `Bearer ${env.STATS_TOKEN}`) return jsonResponse({ error: "unauthorized" }, 401, origin);
+  const days = Math.min(180, Math.max(1, parseInt(new URL(request.url).searchParams.get("days") || "14", 10)));
+  const since = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+  const totals = {}, byDay = {};
+  let cursor;
+  do {
+    const page = await env.GOLEU_KV.list({ prefix: "ev:", cursor });
+    for (const { name: key } of page.keys) {
+      const [, day, ev, src] = key.split(":");
+      if (day < since) continue;
+      const n = parseInt((await env.GOLEU_KV.get(key)) || "0", 10);
+      totals[ev] = totals[ev] || { total: 0 };
+      totals[ev][src] = (totals[ev][src] || 0) + n;
+      totals[ev].total += n;
+      byDay[day] = byDay[day] || {};
+      byDay[day][ev] = (byDay[day][ev] || 0) + n;
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  const waitlist = (await env.GOLEU_KV.list({ prefix: "waitlist:" })).keys.length;
+  return jsonResponse({ since, days, totals, byDay, waitlist }, 200, origin);
+}
+
 // ─── 메인 핸들러 ─────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env, ctx) {
@@ -1126,6 +1176,14 @@ export default {
       let body = {};
       try { body = await request.json(); } catch { return jsonResponse({ error: "bad_json" }, 400, origin); }
       return jsonResponse(recommendAiStack(body), 200, origin);
+    }
+
+    if (path === "/e" && request.method === "POST") {
+      return await handleEvent(request, env, origin);
+    }
+
+    if (path === "/stats" && request.method === "GET") {
+      return await handleStats(request, env, origin);
     }
 
     if (path === "/waitlist" && request.method === "POST") {
